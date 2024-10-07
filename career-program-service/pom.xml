@@ -8,10 +8,10 @@
 		<version>3.3.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>appservice</groupId>
-	<artifactId>EurekaServiceApp</artifactId>
+	<groupId>com.skillspace</groupId>
+	<artifactId>career</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>EurekaServiceApp</name>
+	<name>career</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
