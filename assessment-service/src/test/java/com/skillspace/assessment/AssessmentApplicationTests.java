@@ -1,4 +1,4 @@
-package com.skillspace.application;
+package com.skillspace.assessment;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

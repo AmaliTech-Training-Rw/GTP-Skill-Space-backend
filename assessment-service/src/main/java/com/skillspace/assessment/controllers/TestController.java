@@ -1,4 +1,4 @@
-package com.skillspace.application.controllers;
+package com.skillspace.assessment.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
