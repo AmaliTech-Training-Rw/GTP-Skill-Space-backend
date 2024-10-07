@@ -7,22 +7,54 @@ spring:
   cloud:
     gateway:
       routes:
+        # user-service
         - id: user-service
           uri: lb://user-management-service
           predicates:
             - Path=/users/**
+        - id: user-service-api-docs
+          uri: lb://user-management-service
+          predicates:
+            - Path=/users/v3/api-docs, /users/swagger-ui.html
+          filters:
+            - StripPrefix=1
+
+        # career-service
         - id: career-service
           uri: lb://career-program-service
           predicates:
             - Path=/careers/**
+        - id: career-service-api-docs
+          uri: lb://career-program-service
+          predicates:
+            - Path=/careers/v3/api-docs, /careers/swagger-ui.html
+          filters:
+            - StripPrefix=1
+
+        # assessment-service
         - id: assessment-service
           uri: lb://assessment-service
           predicates:
             - Path=/assessments/**
+        - id: assessment-service-api-docs
+          uri: lb://assessment-service
+          predicates:
+            - Path=/assessments/v3/api-docs, /assessments/swagger-ui.html
+          filters:
+            - StripPrefix=1
+
+        # application-service
         - id: application-service
-          uri: lb://application-management-service
+          uri: lb://application-service
           predicates:
             - Path=/applications/**
+        - id: application-service-api-docs
+          uri: lb://application-service
+          predicates:
+            - Path=/applications/v3/api-docs, /applications/swagger-ui.html
+          filters:
+            - StripPrefix=1
+
       discovery:
         locator:
           enabled: true
@@ -34,3 +66,23 @@ eureka:
       defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
+
+
+# Springdoc OpenAPI Configuration
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - url: /users/v3/api-docs
+        name: User Service API
+      - url: /careers/v3/api-docs
+        name: Career Service API
+      - url: /assessments/v3/api-docs
+        name: Assessment Service API
+      - url: /applications/v3/api-docs
+        name: Application Service API
