@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth/companies")
+@RequestMapping("/auth/register")
 public class CompanyController {
 
     @Autowired
     private CompanyService companyService;
 
-    @PostMapping("/register")
+    @PostMapping("/company")
     public ResponseEntity<Company> registerCompany(@RequestBody CompanyRegistrationRequest request) {
         Account account = createAccountFromRequest(request);
         Company company = createCompanyFromRequest(request);

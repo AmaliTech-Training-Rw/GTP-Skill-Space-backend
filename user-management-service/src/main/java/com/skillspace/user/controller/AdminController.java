@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth/admins")
+@RequestMapping("/auth/register")
 public class AdminController {
 
     @Autowired
     private AdminService adminService;
 
-    @PostMapping("/register")
+    @PostMapping("/admin")
     public ResponseEntity<Admin> registerAdmin(@RequestBody AdminRegistrationRequest request) {
         Account account = createAccountFromRequest(request);
         Admin admin = createAdminFromRequest(request);
