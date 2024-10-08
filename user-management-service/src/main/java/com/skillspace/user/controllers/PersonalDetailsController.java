@@ -1,5 +1,6 @@
 package com.skillspace.user.controllers;
 
+import com.skillspace.user.dto.PersonalDetailsDto;
 import com.skillspace.user.entity.PersonalDetails;
 import com.skillspace.user.service.PersonalDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class PersonalDetailsController {
     }
 
     @PostMapping
-    public ResponseEntity<PersonalDetails> create(@RequestBody PersonalDetails personalDetails) {
+    public ResponseEntity<PersonalDetails> create(@RequestBody PersonalDetailsDto personalDetails) {
         return ResponseEntity.ok(service.create(personalDetails));
     }
 

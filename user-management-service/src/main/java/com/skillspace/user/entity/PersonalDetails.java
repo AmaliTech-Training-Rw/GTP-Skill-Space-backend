@@ -48,4 +48,5 @@ public class PersonalDetails {
 
     @Column
     private String cv;
+
 }

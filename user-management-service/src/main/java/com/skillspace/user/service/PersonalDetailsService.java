@@ -1,5 +1,6 @@
 package com.skillspace.user.service;
 
+import com.skillspace.user.dto.PersonalDetailsDto;
 import com.skillspace.user.entity.PersonalDetails;
 import com.skillspace.user.repository.PersonalDetailsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,21 @@ public class PersonalDetailsService {
         this.repository = repository;
     }
 
-    public PersonalDetails create(PersonalDetails personalDetails) {
-        return repository.save(personalDetails);
+    public PersonalDetails create(PersonalDetailsDto personalDetails) {
+        PersonalDetails newPersonalDetails = new PersonalDetails();
+        newPersonalDetails.setId(UUID.randomUUID());
+        newPersonalDetails.setCv(personalDetails.getCv());
+        newPersonalDetails.setBio(personalDetails.getBio());
+        newPersonalDetails.setDob(personalDetails.getDob());
+        newPersonalDetails.setBadges(personalDetails.getBadges());
+        newPersonalDetails.setAvailable(personalDetails.isAvailable());
+        newPersonalDetails.setLocation(personalDetails.getLocation());
+        newPersonalDetails.setNotificationPreference(personalDetails.getNotificationPreference());
+        newPersonalDetails.setPortfolio(personalDetails.getPortfolio());
+        newPersonalDetails.setTalentId(personalDetails.getTalentId());
+        newPersonalDetails.setSocialMedia(personalDetails.getSocialMedia());
+        newPersonalDetails.setProfilePic(personalDetails.getProfilePic());
+        return repository.save(newPersonalDetails);
     }
 
     public Optional<PersonalDetails> findById(UUID id) {
