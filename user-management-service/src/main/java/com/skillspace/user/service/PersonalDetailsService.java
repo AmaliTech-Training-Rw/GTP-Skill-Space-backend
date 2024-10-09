@@ -1,11 +1,14 @@
 package com.skillspace.user.service;
 
+import com.skillspace.user.dto.FileUploadResponse;
 import com.skillspace.user.dto.PersonalDetailsDto;
 import com.skillspace.user.entity.PersonalDetails;
 import com.skillspace.user.repository.PersonalDetailsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,25 +18,40 @@ public class PersonalDetailsService {
 
     private final PersonalDetailsRepository repository;
 
+    private final FileUploadService fileUploadService;
+
     @Autowired
-    public PersonalDetailsService(PersonalDetailsRepository repository) {
+    public PersonalDetailsService(PersonalDetailsRepository repository, FileUploadService fileUploadService) {
         this.repository = repository;
+        this.fileUploadService = fileUploadService;
     }
 
     public PersonalDetails create(PersonalDetailsDto personalDetails) {
         PersonalDetails newPersonalDetails = new PersonalDetails();
         newPersonalDetails.setId(UUID.randomUUID());
-        newPersonalDetails.setCv(personalDetails.getCv());
         newPersonalDetails.setBio(personalDetails.getBio());
         newPersonalDetails.setDob(personalDetails.getDob());
-        newPersonalDetails.setBadges(personalDetails.getBadges());
+        newPersonalDetails.setBadges(Arrays.asList(personalDetails.getBadges().split(",")));
         newPersonalDetails.setAvailable(personalDetails.isAvailable());
         newPersonalDetails.setLocation(personalDetails.getLocation());
         newPersonalDetails.setNotificationPreference(personalDetails.getNotificationPreference());
         newPersonalDetails.setPortfolio(personalDetails.getPortfolio());
         newPersonalDetails.setTalentId(personalDetails.getTalentId());
         newPersonalDetails.setSocialMedia(personalDetails.getSocialMedia());
-        newPersonalDetails.setProfilePic(personalDetails.getProfilePic());
+
+        MultipartFile profilePic = personalDetails.getProfilePic();
+        MultipartFile cv = personalDetails.getCv();
+
+        if (profilePic != null && !profilePic.isEmpty()) {
+            FileUploadResponse profilePicUploadResponse = fileUploadService.uploadFile(profilePic);
+            newPersonalDetails.setProfilePic(profilePicUploadResponse.getFilePath());
+        }
+
+        if (cv != null && !cv.isEmpty()) {
+            FileUploadResponse cvUploadResponse = fileUploadService.uploadFile(cv);
+            newPersonalDetails.setCv(cvUploadResponse.getFilePath());
+        }
+
         return repository.save(newPersonalDetails);
     }
 
@@ -49,9 +67,6 @@ public class PersonalDetailsService {
         return repository.save(personalDetails);
     }
 
-    public void deleteById(UUID id) {
-        repository.deleteById(id);
-    }
 
     public boolean existsById(UUID id) {
         return repository.existsById(id);

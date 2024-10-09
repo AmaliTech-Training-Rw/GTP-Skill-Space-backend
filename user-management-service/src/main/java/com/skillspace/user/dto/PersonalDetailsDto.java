@@ -1,6 +1,7 @@
 package com.skillspace.user.dto;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,7 +16,7 @@ public class PersonalDetailsDto {
 
     private boolean available;
 
-    private List<String> badges;
+    private String badges;
 
     private String notificationPreference;
 
@@ -25,9 +26,9 @@ public class PersonalDetailsDto {
 
     private String bio;
 
-    private String profilePic;
+    private MultipartFile profilePic;
 
     private Map<String, String> socialMedia;
 
-    private String cv;
+    private MultipartFile cv;
 }
