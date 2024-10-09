@@ -10,7 +10,13 @@ import java.util.Map;
 @Data
 public class PersonalDetailsDto {
 
-    private String talentId;
+    private Long talentId;
+
+    private String firstName;
+
+    private String lastName;
+
+    private String contact;
 
     private String location;
 

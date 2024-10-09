@@ -3,8 +3,10 @@ package com.skillspace.user.controller;
 import com.skillspace.user.dto.EducationDto;
 import com.skillspace.user.entity.Education;
 import com.skillspace.user.service.EducationService;
+import com.skillspace.user.util.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/api/educations")
+@RequestMapping("/api/talent-educations")
 public class EducationController {
 
     private final EducationService educationService;
@@ -22,9 +24,9 @@ public class EducationController {
         this.educationService = educationService;
     }
 
-    @PostMapping
-    public ResponseEntity<Education> createEducation(
-            @RequestPart(value = "talentId", required = false) String talentId,
+    @PatchMapping("/{talentId}")
+    public ResponseEntity<CustomResponse<Education>> createEducation(
+            @PathVariable Long talentId,
             @RequestPart(value = "nameOfInstitution", required = false) String nameOfInstitution,
             @RequestPart(value = "addressOfInstitution", required = false) String addressOfInstitution,
             @RequestPart(value = "country", required = false) String country,
@@ -45,7 +47,7 @@ public class EducationController {
         educationDto.setDateCompleted(dateCompleted);
         educationDto.setTranscripts(transcripts);
 
-        Education createdEducation = educationService.createEducation(educationDto);
-        return ResponseEntity.ok(createdEducation);
+        Education updatedEducation = educationService.updateEducationDetails(educationDto);
+        return new ResponseEntity<>( new CustomResponse<>( "Talent Education details updated successfully", HttpStatus.OK.value(), updatedEducation), HttpStatus.OK );
     }
 }

@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Setter
 public class EducationDto {
 
-    private String talentId;
+    private Long talentId;
     private MultipartFile transcripts;
     private String nameOfInstitution;
     private String addressOfInstitution;

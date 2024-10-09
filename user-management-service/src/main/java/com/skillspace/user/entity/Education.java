@@ -19,10 +19,11 @@ public class Education {
     private UUID id;
 
     @Column("talent_id")
-    private String talentId;
+    private Long talentId;
 
     @Column("transcripts")
     private String transcripts;
+
     @Column("name_of_institution")
     private String nameOfInstitution;
 

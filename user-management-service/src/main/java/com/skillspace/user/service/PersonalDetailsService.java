@@ -2,8 +2,12 @@ package com.skillspace.user.service;
 
 import com.skillspace.user.dto.FileUploadResponse;
 import com.skillspace.user.dto.PersonalDetailsDto;
+import com.skillspace.user.entity.Account;
 import com.skillspace.user.entity.PersonalDetails;
+import com.skillspace.user.entity.Talent;
+import com.skillspace.user.repository.AccountRepository;
 import com.skillspace.user.repository.PersonalDetailsRepository;
+import com.skillspace.user.repository.TalentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,55 +24,75 @@ public class PersonalDetailsService {
 
     private final FileUploadService fileUploadService;
 
+    private final TalentRepository talentRepository;
+
+    private final AccountRepository accountRepository;
+
     @Autowired
-    public PersonalDetailsService(PersonalDetailsRepository repository, FileUploadService fileUploadService) {
+    public PersonalDetailsService(PersonalDetailsRepository repository, FileUploadService fileUploadService, TalentRepository talentRepository, AccountRepository accountRepository) {
         this.repository = repository;
         this.fileUploadService = fileUploadService;
+        this.talentRepository = talentRepository;
+        this.accountRepository = accountRepository;
     }
 
-    public PersonalDetails create(PersonalDetailsDto personalDetails) {
-        PersonalDetails newPersonalDetails = new PersonalDetails();
-        newPersonalDetails.setId(UUID.randomUUID());
-        newPersonalDetails.setBio(personalDetails.getBio());
-        newPersonalDetails.setDob(personalDetails.getDob());
-        newPersonalDetails.setBadges(Arrays.asList(personalDetails.getBadges().split(",")));
-        newPersonalDetails.setAvailable(personalDetails.isAvailable());
-        newPersonalDetails.setLocation(personalDetails.getLocation());
-        newPersonalDetails.setNotificationPreference(personalDetails.getNotificationPreference());
-        newPersonalDetails.setPortfolio(personalDetails.getPortfolio());
-        newPersonalDetails.setTalentId(personalDetails.getTalentId());
-        newPersonalDetails.setSocialMedia(personalDetails.getSocialMedia());
+    public PersonalDetails updatePersonalDetails(PersonalDetailsDto personalDetails) {
+        Optional<PersonalDetails> isDetailsExist = repository.findPersonalDetailsByTalentId(personalDetails.getTalentId());
+        Optional<Talent> talentInfo = talentRepository.findById(personalDetails.getTalentId());
+//        PersonalDetails newPersonalDetails = new PersonalDetails();
 
-        MultipartFile profilePic = personalDetails.getProfilePic();
-        MultipartFile cv = personalDetails.getCv();
+        if (isDetailsExist.isPresent() && talentInfo.isPresent()) {
+            PersonalDetails newPersonalDetails = isDetailsExist.get();
+            Talent newTalent = talentInfo.get();
+            Optional<Account> talentAccountExisting = accountRepository.findById(newTalent.getUserId().getId());
 
-        if (profilePic != null && !profilePic.isEmpty()) {
-            FileUploadResponse profilePicUploadResponse = fileUploadService.uploadFile(profilePic);
-            newPersonalDetails.setProfilePic(profilePicUploadResponse.getFilePath());
+            if (personalDetails.getContact() != null && !personalDetails.getContact().isEmpty() && talentAccountExisting.isPresent()) {
+                Account talentAccount = talentAccountExisting.get();
+                talentAccount.setContact(personalDetails.getContact());
+                accountRepository.save(talentAccount);
+            }
+
+            Optional.ofNullable(personalDetails.getFirstName()).ifPresent(newTalent::setFirstName);
+            Optional.ofNullable(personalDetails.getLastName()).ifPresent(newTalent::setLastName);
+            Optional.ofNullable(personalDetails.getBio()).ifPresent(newPersonalDetails::setBio);
+            Optional.ofNullable(personalDetails.getDob()).ifPresent(newPersonalDetails::setDob);
+            Optional.ofNullable(personalDetails.getBadges())
+                    .filter(badges -> !badges.isEmpty())
+                    .ifPresent(badges -> newPersonalDetails.setBadges(Arrays.asList(badges.split(","))));
+
+            newPersonalDetails.setAvailable(personalDetails.isAvailable());
+
+            Optional.ofNullable(personalDetails.getLocation()).ifPresent(newPersonalDetails::setLocation);
+            Optional.ofNullable(personalDetails.getNotificationPreference()).ifPresent(newPersonalDetails::setNotificationPreference);
+            Optional.ofNullable(personalDetails.getPortfolio()).ifPresent(newPersonalDetails::setPortfolio);
+            Optional.ofNullable(personalDetails.getTalentId()).ifPresent(newPersonalDetails::setTalentId);
+            Optional.ofNullable(personalDetails.getSocialMedia()).ifPresent(newPersonalDetails::setSocialMedia);
+
+            MultipartFile profilePic = personalDetails.getProfilePic();
+            if (profilePic != null && !profilePic.isEmpty()) {
+                FileUploadResponse profilePicUploadResponse = fileUploadService.uploadFile(profilePic);
+                newPersonalDetails.setProfilePic(profilePicUploadResponse.getFilePath());
+            }
+
+            MultipartFile cv = personalDetails.getCv();
+            if (cv != null && !cv.isEmpty()) {
+                FileUploadResponse cvUploadResponse = fileUploadService.uploadFile(cv);
+                newPersonalDetails.setCv(cvUploadResponse.getFilePath());
+            }
+
+            talentRepository.save(newTalent);
+
+            return repository.save(newPersonalDetails);
         }
 
-        if (cv != null && !cv.isEmpty()) {
-            FileUploadResponse cvUploadResponse = fileUploadService.uploadFile(cv);
-            newPersonalDetails.setCv(cvUploadResponse.getFilePath());
-        }
-
-        return repository.save(newPersonalDetails);
+        return null;
     }
 
     public Optional<PersonalDetails> findById(UUID id) {
         return repository.findById(id);
     }
 
-    public List<PersonalDetails> findAll() {
-        return repository.findAll();
-    }
-
-    public PersonalDetails update(PersonalDetails personalDetails) {
-        return repository.save(personalDetails);
-    }
-
-
-    public boolean existsById(UUID id) {
-        return repository.existsById(id);
+    public Optional<PersonalDetails>  findTalentProfile(Long talentId) {
+        return repository.findPersonalDetailsByTalentId(talentId);
     }
 }

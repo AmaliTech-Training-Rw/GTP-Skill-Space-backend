@@ -16,8 +16,8 @@ public class PersonalDetails {
     @PrimaryKey
     private UUID id;
 
-    @Column
-    private String talentId;
+    @Column("talent_id")
+    private Long talentId;
 
     @Column
     private String location;
