@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth/talents")
+@RequestMapping("/auth/register")
 public class TalentController {
 
     @Autowired
     private TalentService talentService;
 
-    @PostMapping("/register")
+    @PostMapping("/talent")
     public ResponseEntity<Talent> registerTalent(@RequestBody TalentRegistrationRequest request) {
         Account account = createAccountFromRequest(request);
         Talent talent = createTalentFromRequest(request);
