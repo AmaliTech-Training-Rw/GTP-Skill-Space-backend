@@ -39,6 +39,19 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.34</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-cassandra</artifactId>
+		</dependency>
+
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -49,6 +62,44 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web-services</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jetty</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-cassandra</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.18</version> <!-- Replace with the latest version -->
+		</dependency>
+
+		<dependency>
+			<groupId>com.datastax.oss</groupId>
+			<artifactId>java-driver-core</artifactId>
+			<version>4.0.0</version> <!-- Replace with the latest version -->
+		</dependency>
+		<dependency>
+			<groupId>com.typesafe</groupId>
+			<artifactId>config</artifactId>
+			<version>1.4.2</version>
+		</dependency>
+
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-undertow</artifactId>
+		</dependency>
+
+
+
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
@@ -64,6 +115,8 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -77,12 +130,3 @@
 	</build>
 
 </project>
-
-
-
-
-
-
-
-
-
