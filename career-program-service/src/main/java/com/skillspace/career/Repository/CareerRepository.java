@@ -11,4 +11,6 @@ import java.util.UUID;
 
 public interface CareerRepository extends CassandraRepository<Career, UUID> {
     List<Career> findByStatus(String status); // For filtering published/draft programs
+    List<Career> findByCompanyId(UUID companyId);
+    List<Career> findByRequiredBadgesIn(List<String> badges);
 }

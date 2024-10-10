@@ -8,10 +8,9 @@ import com.skillspace.user.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth/register")
@@ -47,6 +46,11 @@ public class CompanyController {
         company.setLogo(request.getLogo());
         company.setWebsite(request.getWebsite());
         return company;
+    }
+    @GetMapping("/companies")
+    public ResponseEntity<List<Company>> getAllCompanies(Company company) {
+        List<Company> companies = companyService.getAllCompanies(company);
+        return ResponseEntity.ok(companies);
     }
 }
 

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/careers")
+@RequestMapping("/careers")
 public class CareerController {
 
     private final CareerService careerService;
@@ -59,6 +59,11 @@ public class CareerController {
     @DeleteMapping("/{id}")
     public void deleteCareer(@PathVariable UUID id) {
         careerService.deleteCareer(id);
+    }
+    @GetMapping("/programs/company/{companyName}")
+    public ResponseEntity<List<Career>> getProgramsByCompanyName(@PathVariable String companyName) {
+        List<Career> careers = careerService.getProgramsByCompanyName(companyName);
+        return ResponseEntity.ok(careers);
     }
 }
 

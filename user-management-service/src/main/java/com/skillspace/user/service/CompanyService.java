@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class CompanyService extends UserRegistrationService<Company> {
@@ -22,5 +23,9 @@ public class CompanyService extends UserRegistrationService<Company> {
         company.setUpdatedAt(LocalDateTime.now());
 
         return companyRepository.save(company);
+    }
+
+    public List<Company> getAllCompanies (Company company) {
+        return companyRepository.findAll();
     }
 }
