@@ -31,9 +31,9 @@ public class CompanyController {
     // Helper method to create Account from CompanyRegistrationRequest
     private Account createAccountFromRequest(CompanyRegistrationRequest request) {
         Account account = new Account();
-        account.setEmail(request.getEmail());
-        account.setPassword(request.getPassword());
-        account.setContact(request.getContact());
+        account.setEmail(request.getEmail().trim());
+        account.setPassword(request.getPassword().trim());
+        account.setContact(request.getContact().trim());
         account.setRole(UserRole.COMPANY);
         return account;
     }
@@ -41,10 +41,10 @@ public class CompanyController {
     // Helper method to create Company from CompanyRegistrationRequest
     private Company createCompanyFromRequest(CompanyRegistrationRequest request) {
         Company company = new Company();
-        company.setName(request.getName());
-        company.setCertificate(request.getCertificate());
-        company.setLogo(request.getLogo());
-        company.setWebsite(request.getWebsite());
+        company.setName(request.getName().trim());
+        company.setCertificate(request.getCertificate().trim());
+        company.setLogo(request.getLogo().trim());
+        company.setWebsite(request.getWebsite().trim());
         return company;
     }
     @GetMapping("/companies")

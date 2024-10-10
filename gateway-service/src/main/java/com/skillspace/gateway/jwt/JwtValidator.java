@@ -34,4 +34,15 @@ public class JwtValidator {
                 .getPayload()
                 .getSubject();
     }
+
+    // Method to extract the role from the JWT token
+    public String getRoleFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("role", String.class);
+    }
+
 }
