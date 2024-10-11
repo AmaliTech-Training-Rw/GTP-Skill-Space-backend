@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/auth/register/all").permitAll()
                 .requestMatchers("/users/v3/api-docs/**","/applications/v3/api-docs","/assessments/v3/api-docs","/careers/v3/api-docs").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
         )
         .oauth2Login(oauth2 -> oauth2
                 .authorizationEndpoint(authEndpoint -> authEndpoint

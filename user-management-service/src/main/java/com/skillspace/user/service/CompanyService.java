@@ -1,8 +1,11 @@
 package com.skillspace.user.service;
 
 import com.skillspace.user.entity.Account;
+import com.skillspace.user.entity.AccountStatus;
 import com.skillspace.user.entity.Company;
+import com.skillspace.user.repository.AccountRepository;
 import com.skillspace.user.repository.CompanyRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +25,9 @@ public class CompanyService extends UserRegistrationService<Company> {
         this.companyRepository = companyRepository;
     }
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     @Override
     protected Company saveUser(Company company, Account savedAccount) {
         // Link the Company entity to the saved Account entity
@@ -32,9 +38,35 @@ public class CompanyService extends UserRegistrationService<Company> {
         return companyRepository.save(company);
     }
 
+    // method to fetch companies with PENDING status
+    public List<Company> getPendingCompanies() {
+        return companyRepository.findPendingCompanies();
+    }
+
+    // method to approve company by setting the associated account's status to ACTIVE
+    public void approveCompany(Long companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+
+        Account account = company.getUserId();
+        account.setStatus(AccountStatus.ACTIVE);
+        accountRepository.save(account);
+    }
+
+    // method to reject company by setting the associated account's status to REJECTED
+    public void rejectCompany(Long companyId) {
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+
+        Account account = company.getUserId();
+        account.setStatus(AccountStatus.REJECTED);
+        accountRepository.save(account);
+    }
+
     public List<Company> getAllCompanies() {
         return companyRepository.findAll();
     }
+
     public Company findByName(String name) {
         return companyRepository.findByName(name);
     }

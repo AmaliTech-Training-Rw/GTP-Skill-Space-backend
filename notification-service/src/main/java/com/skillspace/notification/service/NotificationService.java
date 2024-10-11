@@ -1,25 +1,29 @@
 package com.skillspace.notification.service;
 
-import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NotificationService {
 
-    @KafkaListener(topics = "account-created", groupId = "skillspace-notifications-messenger")
-    public void handleAccountCreatedEvent(String email) {
-        // Logic to send OTP, approval emails, etc.
-        sendOtp(email);
-        sendAccountApprovalRequest(email);
-    }
+    @Autowired
+    private JavaMailSender mailSender;
 
-    private void sendOtp(String email) {
-        // Send OTP logic
-    }
+    public void sendEmail(String to, String subject, String text) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(text);
+    try {
+        mailSender.send(message);
+        System.out.println("Notification email sent successfully.");
+    } catch (MailException e) {
+        System.err.println("Error while sending notification email: " + e.getMessage());
+        }
 
-    private void sendAccountApprovalRequest(String email) {
-        // Send approval email to System Administrator
     }
 }
-
 
