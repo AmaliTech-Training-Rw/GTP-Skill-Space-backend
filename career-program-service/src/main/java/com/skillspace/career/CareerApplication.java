@@ -7,8 +7,10 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
+@EnableFeignClients
 @OpenAPIDefinition(
 		info = @Info(title = "Career Program Service", version = "1.0", description = "Career Program API v1.0"),
 		security = @SecurityRequirement(name = "bearerAuth")
