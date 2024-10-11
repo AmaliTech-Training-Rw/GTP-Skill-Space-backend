@@ -10,10 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth/register")
@@ -49,6 +48,19 @@ public class TalentController {
         talent.setLastName(request.getLastname().trim());
         return talent;
     }
+    @GetMapping("/talent/{id}")
+    public ResponseEntity<?> getTalentById(@PathVariable Long id) {
+        Optional<Talent> talent = talentService.getTalentById(id);
+        if (talent.isPresent()) {
+            return ResponseEntity.ok(talent.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
+
+
+
 
 

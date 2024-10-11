@@ -10,7 +10,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 import com.skillspace.career.Client.CompanyClient;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -71,6 +73,10 @@ public class CareerService {
         career.setOptionalBadges(careerDetails.getOptionalBadges());
 
         return careerRepository.save(career);
+    }
+    public List<Career> getCareerById(Long id) {
+        Optional<Career> careerOptional = careerRepository.findById(id);
+        return careerOptional.map(Collections::singletonList).orElse(Collections.emptyList());
     }
 
     public List<Career> getPublishedCareers() {

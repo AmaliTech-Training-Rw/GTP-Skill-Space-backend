@@ -6,8 +6,10 @@ import com.skillspace.career.Service.CareerService;
 import com.skillspace.career.dto.CompanyDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -19,17 +21,14 @@ public class CareerController {
 
     private final CareerService careerService;
 
+
+
     @Autowired
     public CareerController(CareerService careerService,CompanyClient companyClient) {
         this.careerService = careerService;
         this.companyClient = companyClient;
     }
 
-//    @PostMapping
-//    public ResponseEntity<Career> createCareer(@RequestBody Career career) {
-//        Career createdCareer = careerService.createCareer(career);
-//        return new ResponseEntity<>(createdCareer, HttpStatus.CREATED);
-//    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Career> updateCareer(@PathVariable Long id, @RequestBody Career careerDetails) {
@@ -97,5 +96,7 @@ public class CareerController {
         CompanyDTO company = companyClient.getCompanyByName(companyName);
         return careerService.getProgramsByCompanyId(company.getCompanyId());
     }
+
+
 
 }

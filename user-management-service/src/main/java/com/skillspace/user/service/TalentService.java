@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
@@ -24,6 +25,10 @@ public class TalentService extends UserRegistrationService<Talent> {
 
         return talentRepository.save(talent);
     }
+    public Optional<Talent> getTalentById(Long id) {
+        return talentRepository.findById(id);
+    }
+
 }
 
 
