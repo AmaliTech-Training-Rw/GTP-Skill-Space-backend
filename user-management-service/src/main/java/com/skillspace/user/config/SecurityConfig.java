@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .requestMatchers("/auth/register/**", "/oauth2/**", "/auth/login", "/auth/login/oauth2/code/google", "/auth/oauth2/authorize/google").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
                 .requestMatchers("/users/v3/api-docs/**","/applications/v3/api-docs","/assessments/v3/api-docs","/careers/v3/api-docs").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
         )
         .oauth2Login(oauth2 -> oauth2
                 .authorizationEndpoint(authEndpoint -> authEndpoint
