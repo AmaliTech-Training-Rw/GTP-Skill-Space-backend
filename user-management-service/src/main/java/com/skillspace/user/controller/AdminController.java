@@ -32,9 +32,9 @@ public class AdminController {
     // Helper method to create Account from AdminRegistrationRequest
     private Account createAccountFromRequest(AdminRegistrationRequest request) {
         Account account = new Account();
-        account.setEmail(request.getEmail());
-        account.setPassword(request.getPassword());
-        account.setContact(request.getContact());
+        account.setEmail(request.getEmail().trim());
+        account.setPassword(request.getPassword().trim());
+        account.setContact(request.getContact().trim());
         account.setRole(UserRole.ADMIN);
         return account;
     }
@@ -42,8 +42,8 @@ public class AdminController {
     // Helper method to create Admin from AdminRegistrationRequest
     private Admin createAdminFromRequest(AdminRegistrationRequest request) {
         Admin admin = new Admin();
-        admin.setName(request.getName());
-        admin.setContact(request.getContact());
+        admin.setName(request.getName().trim());
+        admin.setContact(request.getContact().trim());
         return admin;
     }
 }

@@ -8,17 +8,20 @@ import com.skillspace.user.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth/register")
 public class CompanyController {
 
+    private final CompanyService companyService;
+
     @Autowired
-    private CompanyService companyService;
+    public CompanyController(CompanyService companyService) {
+        this.companyService = companyService;
+    }
 
     @PostMapping("/company")
     public ResponseEntity<Company> registerCompany(@RequestBody CompanyRegistrationRequest request) {
@@ -32,9 +35,9 @@ public class CompanyController {
     // Helper method to create Account from CompanyRegistrationRequest
     private Account createAccountFromRequest(CompanyRegistrationRequest request) {
         Account account = new Account();
-        account.setEmail(request.getEmail());
-        account.setPassword(request.getPassword());
-        account.setContact(request.getContact());
+        account.setEmail(request.getEmail().trim());
+        account.setPassword(request.getPassword().trim());
+        account.setContact(request.getContact().trim());
         account.setRole(UserRole.COMPANY);
         return account;
     }
@@ -42,11 +45,20 @@ public class CompanyController {
     // Helper method to create Company from CompanyRegistrationRequest
     private Company createCompanyFromRequest(CompanyRegistrationRequest request) {
         Company company = new Company();
-        company.setName(request.getName());
-        company.setCertificate(request.getCertificate());
-        company.setLogo(request.getLogo());
-        company.setWebsite(request.getWebsite());
+        company.setName(request.getName().trim());
+        company.setCertificate(request.getCertificate().trim());
+        company.setLogo(request.getLogo().trim());
+        company.setWebsite(request.getWebsite().trim());
         return company;
+    }
+    @GetMapping("/all")
+    public List<Company> getAllCompanies() {
+        return companyService.getAllCompanies();
+    }
+
+    @GetMapping("/{name}")
+    public Company getCompanyByName(@PathVariable String name) {
+        return companyService.findByName(name);
     }
 }
 
