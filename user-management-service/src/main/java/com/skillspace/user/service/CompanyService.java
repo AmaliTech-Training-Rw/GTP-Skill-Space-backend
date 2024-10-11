@@ -8,7 +8,6 @@ import com.skillspace.user.entity.Company;
 import com.skillspace.user.repository.AccountRepository;
 import com.skillspace.user.repository.CompanyRepository;
 import com.skillspace.user.util.CustomResponse;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
