@@ -29,9 +29,7 @@ public class Quiz {
     @NotNull
     private String companyId;
 
-   //@NotEmpty
-   // @CassandraType(type = CassandraType.Name.LIST, userTypeName = "question")
-   @Column
+    @Column
     private List<Question> questions;
 
     private int timeLimit;
@@ -47,8 +45,9 @@ public class Quiz {
 
     @NotNull
     @CassandraType(type = CassandraType.Name.INT)
-    private int passingScore; // Ensure correct field name and type
-    // Minimum score required to pass
+    private int passingScore;
 
-    private int totalPoints;  // Total points for the quiz
+    private int totalPoints;
+
+    private String imageUrl;
 }

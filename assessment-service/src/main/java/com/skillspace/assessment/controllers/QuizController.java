@@ -1,50 +1,52 @@
 package com.skillspace.assessment.controllers;
 
 import com.skillspace.assessment.model.Quiz;
-import com.skillspace.assessment.model.QuizAttempt;
 import com.skillspace.assessment.model.QuizAttemptRequest;
+import com.skillspace.assessment.model.QuizAttemptResult;
 import com.skillspace.assessment.service.QuizService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/quizzes")
+@RequestMapping("/assessments/api/quizzes")
 public class QuizController {
 
     @Autowired
     private QuizService quizService;
 
+
     @PostMapping
-    public ResponseEntity<Quiz> createQuiz(@Valid @RequestBody Quiz quiz) {
+    public ResponseEntity<Quiz> createQuiz(@Valid @RequestPart Quiz quiz, @RequestPart MultipartFile image) {
         if (quiz.getQuestions() == null || quiz.getQuestions().isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
-        Quiz createdQuiz = quizService.createQuiz(quiz);
+
+        Quiz createdQuiz;
+        try {
+            createdQuiz = quizService.createQuiz(quiz, image);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
         return new ResponseEntity<>(createdQuiz, HttpStatus.CREATED);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Quiz> getQuizById(@PathVariable UUID id) {
         Quiz quiz = quizService.getQuizById(id);
         return ResponseEntity.ok(quiz);
     }
-    @PostMapping("/{id}/attempt")
-    public ResponseEntity<String> attemptQuiz(@PathVariable UUID id, @Valid @RequestBody QuizAttemptRequest request) {
-        // You might want to create a default user ID or just log this attempt
-        UUID dummyUserId = UUID.randomUUID(); // Placeholder for user ID since you don't have a user
-        quizService.saveQuizAttempt(dummyUserId, id, request.getUserAnswers());
-        return ResponseEntity.ok("Quiz attempt recorded.");
-    }
 
-
-
-    // Get All Quizzes (with filtering)
     @GetMapping
     public ResponseEntity<List<Quiz>> getAllQuizzes(
             @RequestParam(required = false) String companyId,
@@ -54,33 +56,33 @@ public class QuizController {
         return ResponseEntity.ok(quizzes);
     }
 
-    // Update Quiz
     @PutMapping("/{id}")
     public ResponseEntity<Quiz> updateQuiz(@PathVariable UUID id, @RequestBody Quiz quiz) {
         Quiz updatedQuiz = quizService.updateQuiz(id, quiz);
         return ResponseEntity.ok(updatedQuiz);
     }
 
-    // Delete Quiz
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuiz(@PathVariable UUID id) {
         quizService.deleteQuiz(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Complete Quiz (after an attempt)
-    @PostMapping("/{id}/complete")
-    public ResponseEntity<String> completeQuiz(@PathVariable UUID id, @RequestParam int score) {
-        boolean passed = quizService.evaluateQuizCompletion(id, score);
-        if (passed) {
-            // Award badge and add to profile
-            return ResponseEntity.ok("Quiz passed, badge awarded!");
-        } else {
-            return ResponseEntity.ok("Quiz failed, try again in a week.");
-        }
+    @PostMapping("/{id}/attempt")
+    public ResponseEntity<QuizAttemptResult> attemptQuiz(@PathVariable UUID id, @Valid @RequestBody QuizAttemptRequest request) {
+        UUID dummyUserId = UUID.randomUUID();
+        List<String> userAnswers = new ArrayList<>();
+        userAnswers.add(request.getAnswer1());
+        userAnswers.add(request.getAnswer2());
+        userAnswers.add(request.getAnswer3());
+        userAnswers.add(request.getAnswer4());
+        userAnswers.add(request.getAnswer5());
+        userAnswers.removeIf(answer -> answer == null || answer.isEmpty());
+
+        QuizAttemptResult result = quizService.saveQuizAttempt(dummyUserId, id, userAnswers);
+        return ResponseEntity.ok(result);
     }
 
-    // Retry quiz after a week (blocked for 7 days)
     @PostMapping("/{id}/retry")
     public ResponseEntity<String> retryQuiz(@PathVariable UUID id) {
         boolean retryAllowed = quizService.canRetryQuiz(id);

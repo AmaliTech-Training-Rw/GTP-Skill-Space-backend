@@ -7,3 +7,4 @@ import java.util.UUID;
 
 public interface BadgeRepository extends CrudRepository<Badge, UUID> {
 }
+

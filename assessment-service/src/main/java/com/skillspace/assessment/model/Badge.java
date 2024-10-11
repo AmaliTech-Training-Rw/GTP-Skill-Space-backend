@@ -15,9 +15,5 @@ import java.util.UUID;
 public class Badge {
     @PrimaryKey
     private UUID id;
-
     private String name;
-    private String description;
-    private String criteria;
-    private String companyName;
 }

@@ -22,5 +22,4 @@ public class QuizAttempt {
     private int score;
     private long timestamp;
 
-    // Additional fields as needed
 }
