@@ -3,11 +3,16 @@ package com.skillspace.user.service;
 import com.skillspace.user.dto.EducationDto;
 import com.skillspace.user.dto.FileUploadResponse;
 import com.skillspace.user.entity.Education;
-import com.skillspace.user.entity.PersonalDetails;
+import com.skillspace.user.entity.ProgramStatus;
 import com.skillspace.user.repository.EducationRepository;
+import com.skillspace.user.repository.TalentRepository;
+import com.skillspace.user.util.CustomResponse;
+import com.skillspace.user.util.helper.HelperMethods;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -18,28 +23,26 @@ public class EducationService {
     private final EducationRepository educationRepository;
 
     private final FileUploadService fileUploadService;
+    private final TalentRepository talentRepository;
 
     @Autowired
-    public EducationService(EducationRepository educationRepository, FileUploadService fileUploadService) {
+    public EducationService(EducationRepository educationRepository, FileUploadService fileUploadService, TalentRepository talentRepository) {
         this.educationRepository = educationRepository;
         this.fileUploadService = fileUploadService;
+        this.talentRepository = talentRepository;
     }
 
-    public Education updateEducationDetails(EducationDto educationDto) {
-        Optional<Education> isDetailsExist = educationRepository.findEducationByTalentId(educationDto.getTalentId());
+    public CustomResponse<Education> createEducationDetails(EducationDto educationDto) {
+        try {
 
-        if (isDetailsExist.isPresent()) {
-            Education education = isDetailsExist.get();
-//            Education education = new Education();
-//            education.setId(UUID.randomUUID());
-            Optional.ofNullable(educationDto.getTalentId()).ifPresent(education::setTalentId);
-            Optional.ofNullable(educationDto.getNameOfInstitution()).ifPresent(education::setNameOfInstitution);
-            Optional.ofNullable(educationDto.getAddressOfInstitution()).ifPresent(education::setAddressOfInstitution);
-            Optional.ofNullable(educationDto.getCountry()).ifPresent(education::setCountry);
-            Optional.ofNullable(educationDto.getNameOfProgram()).ifPresent(education::setNameOfProgram);
-            Optional.ofNullable(educationDto.getProgramStatus()).ifPresent(education::setProgramStatus);
-            Optional.ofNullable(educationDto.getDateCommencement()).ifPresent(education::setDateCommencement);
-            Optional.ofNullable(educationDto.getDateCompleted()).ifPresent(education::setDateCompleted);
+            Boolean isTalentExist = talentRepository.existsById(educationDto.getTalentId());
+
+            if (!isTalentExist) {
+                return new CustomResponse<>("Talent not found", HttpStatus.NOT_FOUND.value());
+            }
+
+            HelperMethods helperMethods = new HelperMethods();
+            Education education = helperMethods.buildEducation(educationDto);
 
             MultipartFile transcript = educationDto.getTranscripts();
 
@@ -47,9 +50,49 @@ public class EducationService {
                 FileUploadResponse transcriptsResponse = fileUploadService.uploadFile(transcript);
                 education.setTranscripts(transcriptsResponse.getFilePath());
             }
+            Education savedEducation = educationRepository.save(education);
 
-            return educationRepository.save(education);
+            return new CustomResponse<>("Education details created successfully", HttpStatus.OK.value(), savedEducation);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create education details", e);
         }
-        return null;
+
     }
+
+
+    public CustomResponse<Education> updateEducationDetails(UUID id, EducationDto educationDto) {
+
+        try {
+            Optional<Education> isDetailsExist = educationRepository.findById(id);
+
+            if (isDetailsExist.isPresent()) {
+                Education education = isDetailsExist.get();
+                new HelperMethods().updateEducationFields(education, educationDto);
+
+                MultipartFile transcript = educationDto.getTranscripts();
+
+                if (transcript != null && !transcript.isEmpty()) {
+                    FileUploadResponse transcriptsResponse = fileUploadService.uploadFile(transcript);
+                    education.setTranscripts(transcriptsResponse.getFilePath());
+                }
+                Education updatedEducation = educationRepository.save(education);
+                return new CustomResponse<>("Education details updated successfully", HttpStatus.OK.value(), updatedEducation);
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Education record not found");
+            }
+        } catch (Exception e) {
+            return new CustomResponse<>("Failed to update education details: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+    }
+
+    //Helper
+    public static boolean isValid(String value) {
+        for (ProgramStatus status : ProgramStatus.values()) {
+            if (status.name().equalsIgnoreCase(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

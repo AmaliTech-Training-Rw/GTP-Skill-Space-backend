@@ -1,5 +1,6 @@
 package com.skillspace.user.dto;
 
+import com.skillspace.user.entity.ProgramStatus;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,7 +17,7 @@ public class EducationDto {
     private String addressOfInstitution;
     private String country;
     private String nameOfProgram;
-    private String programStatus;
+    private ProgramStatus programStatus;
     private LocalDate dateCommencement;
     private LocalDate dateCompleted;
 }

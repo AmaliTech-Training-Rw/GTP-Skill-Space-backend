@@ -23,13 +23,16 @@ public class PersonalDetails {
     private String location;
 
     @Column
-    private boolean available;
+    private boolean available = true;
+
+    @Column
+    private boolean contactVisibility = true;
 
     @Column
     private List<String> badges;
 
     @Column("notification_preference")
-    private String notificationPreference;
+    private NotificationPreference notificationPreference;
 
     @Column
     private String portfolio;
@@ -50,3 +53,4 @@ public class PersonalDetails {
     private String cv;
 
 }
+

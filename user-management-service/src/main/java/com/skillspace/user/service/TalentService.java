@@ -30,7 +30,7 @@ public class TalentService extends UserRegistrationService<Talent> {
     @Override
     protected Talent saveUser(Talent talent, Account savedAccount) {
         PersonalDetails personalDetails = new PersonalDetails();
-        Education education = new Education();
+
         // Link the Talent entity to the saved Account entity
         talent.setUserId(savedAccount);
         talent.setCreatedAt(LocalDateTime.now());
@@ -41,10 +41,6 @@ public class TalentService extends UserRegistrationService<Talent> {
         personalDetails.setId(UUID.randomUUID());
         personalDetails.setTalentId(savedTalent.getTalentId());
         personalDetailsRepository.save(personalDetails);
-
-        education.setId(UUID.randomUUID());
-        education.setTalentId(savedTalent.getTalentId());
-        educationRepository.save(education);
 
         return savedTalent;
     }

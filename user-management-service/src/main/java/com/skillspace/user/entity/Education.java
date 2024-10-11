@@ -37,7 +37,7 @@ public class Education {
     private String nameOfProgram;
 
     @Column("program_status")
-    private String programStatus;
+    private ProgramStatus programStatus;
 
     @Column("date_commencement")
     private LocalDate dateCommencement;

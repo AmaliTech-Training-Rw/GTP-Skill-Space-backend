@@ -7,8 +7,10 @@ import com.skillspace.user.entity.AccountStatus;
 import com.skillspace.user.entity.Company;
 import com.skillspace.user.repository.AccountRepository;
 import com.skillspace.user.repository.CompanyRepository;
+import com.skillspace.user.util.CustomResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -93,42 +96,57 @@ public class CompanyService extends UserRegistrationService<Company> {
     }
 
     @Transactional
-    public Company updateCompany(Long companyId, UpdateCompany updatedCompany) {
-        Optional<Company> existingCompanyOpt = companyRepository.findById(companyId);
+    public CustomResponse<Company> updateCompany(Long companyId, UpdateCompany updatedCompany) {
 
-        if (existingCompanyOpt.isPresent()) {
-            Company existingCompany = existingCompanyOpt.get();
-            Optional<Account> companyAccountExisting = accountRepository.findById(existingCompany.getUserId().getId());
+        try {
+            Optional<Company> existingCompanyOpt = companyRepository.findById(companyId);
 
-            if (updatedCompany.getName() != null && !updatedCompany.getName().isEmpty()) {
-                existingCompany.setName(updatedCompany.getName());
+            if (existingCompanyOpt.isPresent()) {
+                Company existingCompany = existingCompanyOpt.get();
+                updateCompanyFields(existingCompany, updatedCompany);
+
+                return new CustomResponse<>("Company updated successfully", HttpStatus.OK.value(), companyRepository.save(existingCompany));
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found");
             }
-
-            if (updatedCompany.getContact() != null && !updatedCompany.getContact().isEmpty() && companyAccountExisting.isPresent()) {
-                Account companyAccount = companyAccountExisting.get();
-                companyAccount.setContact(updatedCompany.getContact());
-                accountRepository.save(companyAccount);
-            }
-
-            if(updatedCompany.getCertificate() != null && !updatedCompany.getCertificate().isEmpty()) {
-                MultipartFile certificateFile = updatedCompany.getCertificate();
-                FileUploadResponse certificateUploadResponse = fileUploadService.uploadFile(certificateFile);
-                existingCompany.setCertificate(certificateUploadResponse.getFilePath());
-            }
-
-            if(updatedCompany.getLogo() != null && !updatedCompany.getLogo().isEmpty()) {
-                MultipartFile logoFile = updatedCompany.getLogo();
-                FileUploadResponse logoUploadResponse = fileUploadService.uploadFile(logoFile);
-                existingCompany.setCertificate(logoUploadResponse.getFilePath());
-            }
-
-            if (updatedCompany.getWebsite() != null && !updatedCompany.getWebsite().isEmpty()) {
-                existingCompany.setWebsite(updatedCompany.getWebsite());
-            }
-
-            return companyRepository.save(existingCompany);
-        } else {
-            throw new EntityNotFoundException("Company not found");
+        } catch (Exception e) {
+            return new CustomResponse<>("Failed to update company: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
+    }
+
+    //Helper
+    private void updateCompanyFields(Company existingCompany, UpdateCompany updatedCompany) {
+        Optional.ofNullable(updatedCompany.getName())
+                .filter(name -> !name.isEmpty())
+                .ifPresent(existingCompany::setName);
+
+        Optional.ofNullable(updatedCompany.getContact())
+                .filter(contact -> !contact.isEmpty())
+                .ifPresent(contact -> {
+                    Long userId = existingCompany.getUserId().getId();
+                    Optional<Account> companyAccountExisting = accountRepository.findById(userId);
+                    companyAccountExisting.ifPresent(account -> {
+                        account.setContact(contact);
+                        accountRepository.save(account);
+                    });
+                });
+
+        Optional.ofNullable(updatedCompany.getCertificate())
+                .filter(certificateFile -> !certificateFile.isEmpty())
+                .ifPresent(certificateFile -> {
+                    FileUploadResponse certificateUploadResponse = fileUploadService.uploadFile(certificateFile);
+                    existingCompany.setCertificate(certificateUploadResponse.getFilePath());
+                });
+
+        Optional.ofNullable(updatedCompany.getLogo())
+                .filter(logoFile -> !logoFile.isEmpty())
+                .ifPresent(logoFile -> {
+                    FileUploadResponse logoUploadResponse = fileUploadService.uploadFile(logoFile);
+                    existingCompany.setLogo(logoUploadResponse.getFilePath());
+                });
+
+        Optional.ofNullable(updatedCompany.getWebsite())
+                .filter(website -> !website.isEmpty())
+                .ifPresent(existingCompany::setWebsite);
     }
 }

@@ -36,10 +36,9 @@ public class PersonalDetailsService {
         this.accountRepository = accountRepository;
     }
 
-    public PersonalDetails updatePersonalDetails(PersonalDetailsDto personalDetails) {
-        Optional<PersonalDetails> isDetailsExist = repository.findPersonalDetailsByTalentId(personalDetails.getTalentId());
-        Optional<Talent> talentInfo = talentRepository.findById(personalDetails.getTalentId());
-//        PersonalDetails newPersonalDetails = new PersonalDetails();
+    public PersonalDetails updatePersonalDetails(Long talentId, PersonalDetailsDto personalDetails) {
+        Optional<PersonalDetails> isDetailsExist = repository.findPersonalDetailsByTalentId(talentId);
+        Optional<Talent> talentInfo = talentRepository.findById(talentId);
 
         if (isDetailsExist.isPresent() && talentInfo.isPresent()) {
             PersonalDetails newPersonalDetails = isDetailsExist.get();
@@ -65,7 +64,6 @@ public class PersonalDetailsService {
             Optional.ofNullable(personalDetails.getLocation()).ifPresent(newPersonalDetails::setLocation);
             Optional.ofNullable(personalDetails.getNotificationPreference()).ifPresent(newPersonalDetails::setNotificationPreference);
             Optional.ofNullable(personalDetails.getPortfolio()).ifPresent(newPersonalDetails::setPortfolio);
-            Optional.ofNullable(personalDetails.getTalentId()).ifPresent(newPersonalDetails::setTalentId);
             Optional.ofNullable(personalDetails.getSocialMedia()).ifPresent(newPersonalDetails::setSocialMedia);
 
             MultipartFile profilePic = personalDetails.getProfilePic();
