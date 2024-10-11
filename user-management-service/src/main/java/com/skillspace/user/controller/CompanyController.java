@@ -16,8 +16,12 @@ import java.util.List;
 @RequestMapping("/auth/register")
 public class CompanyController {
 
+    private final CompanyService companyService;
+
     @Autowired
-    private CompanyService companyService;
+    public CompanyController(CompanyService companyService) {
+        this.companyService = companyService;
+    }
 
     @PostMapping("/company")
     public ResponseEntity<Company> registerCompany(@RequestBody CompanyRegistrationRequest request) {
@@ -47,10 +51,14 @@ public class CompanyController {
         company.setWebsite(request.getWebsite().trim());
         return company;
     }
-    @GetMapping("/companies")
-    public ResponseEntity<List<Company>> getAllCompanies(Company company) {
-        List<Company> companies = companyService.getAllCompanies(company);
-        return ResponseEntity.ok(companies);
+    @GetMapping("/all")
+    public List<Company> getAllCompanies() {
+        return companyService.getAllCompanies();
+    }
+
+    @GetMapping("/{name}")
+    public Company getCompanyByName(@PathVariable String name) {
+        return companyService.findByName(name);
     }
 }
 

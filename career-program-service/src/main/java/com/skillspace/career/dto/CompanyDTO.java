@@ -3,15 +3,15 @@ package com.skillspace.career.dto;
 import java.util.UUID;
 
 public class CompanyDTO {
-    private UUID companyId;
+    private Long companyId;
     private String name;
 
     // Getters and Setters
-    public UUID getCompanyId() {
+    public Long getCompanyId() {
         return companyId;
     }
 
-    public void setCompanyId(UUID companyId) {
+    public void setCompanyId(Long companyId) {
         this.companyId = companyId;
     }
 
@@ -22,5 +22,6 @@ public class CompanyDTO {
     public void setName(String name) {
         this.name = name;
     }
+
 }
 
