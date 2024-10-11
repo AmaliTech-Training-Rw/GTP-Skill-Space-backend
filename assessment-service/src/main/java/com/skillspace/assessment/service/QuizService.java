@@ -27,7 +27,6 @@ public class QuizService {
 
     private final QuizRepository quizRepository;
     private final QuizAttemptRepository quizAttemptRepository;
-    private final UserService userService;
     private final BadgeRepository badgeRepository;
 
     @Autowired

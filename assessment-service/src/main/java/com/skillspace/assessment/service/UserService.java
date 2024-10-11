@@ -1,5 +1,7 @@
 package com.skillspace.assessment.service;
 
+import com.skillspace.assessment.model.User;
+import com.skillspace.assessment.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
