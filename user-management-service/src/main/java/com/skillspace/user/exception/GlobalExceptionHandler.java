@@ -52,10 +52,4 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.valueOf(ex.getStatusCode().value()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<CustomResponse<String>> handleGenericException(Exception ex) {
-        CustomResponse<String> response = new CustomResponse<>("An error occurred: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 }
-
