@@ -2,6 +2,7 @@ package com.skillspace.user.service;
 
 import com.skillspace.user.dto.EducationDto;
 import com.skillspace.user.dto.FileUploadResponse;
+import com.skillspace.user.dto.UpdateEducationDto;
 import com.skillspace.user.entity.Education;
 import com.skillspace.user.entity.ProgramStatus;
 import com.skillspace.user.repository.EducationRepository;
@@ -32,7 +33,7 @@ public class EducationService {
         this.talentRepository = talentRepository;
     }
 
-    public CustomResponse<Education> createEducationDetails(EducationDto educationDto) {
+    public CustomResponse<Education> createEducationDetails(EducationDto educationDto, MultipartFile reqTranscript) {
         try {
 
             Boolean isTalentExist = talentRepository.existsById(educationDto.getTalentId());
@@ -44,7 +45,7 @@ public class EducationService {
             HelperMethods helperMethods = new HelperMethods();
             Education education = helperMethods.buildEducation(educationDto);
 
-            MultipartFile transcript = educationDto.getTranscripts();
+            MultipartFile transcript = reqTranscript;
 
             if (transcript != null && !transcript.isEmpty()) {
                 FileUploadResponse transcriptsResponse = fileUploadService.uploadFile(transcript);
@@ -60,7 +61,7 @@ public class EducationService {
     }
 
 
-    public CustomResponse<Education> updateEducationDetails(UUID id, EducationDto educationDto) {
+    public CustomResponse<Education> updateEducationDetails(UUID id, UpdateEducationDto educationDto, MultipartFile reqTranscript) {
 
         try {
             Optional<Education> isDetailsExist = educationRepository.findById(id);
@@ -69,7 +70,7 @@ public class EducationService {
                 Education education = isDetailsExist.get();
                 new HelperMethods().updateEducationFields(education, educationDto);
 
-                MultipartFile transcript = educationDto.getTranscripts();
+                MultipartFile transcript = reqTranscript;
 
                 if (transcript != null && !transcript.isEmpty()) {
                     FileUploadResponse transcriptsResponse = fileUploadService.uploadFile(transcript);

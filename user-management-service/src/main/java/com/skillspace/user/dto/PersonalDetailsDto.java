@@ -1,6 +1,7 @@
 package com.skillspace.user.dto;
 
 import com.skillspace.user.entity.NotificationPreference;
+import com.skillspace.user.util.customValidation.ValidContact;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
@@ -25,9 +26,10 @@ public class PersonalDetailsDto {
     @Size(max = 50, message = "Last name cannot exceed 50 characters")
     private String lastName;
 
-    @Pattern(regexp = "^\\+?[0-9. ()-]{7,}$", message = "Invalid contact number")
+    @ValidContact
     private String contact;
 
+    @Size(max = 50, message = "Location cannot exceed 50 characters")
     private String location;
 
     private boolean available;
@@ -48,10 +50,10 @@ public class PersonalDetailsDto {
     @Size(max = 1000, message = "Bio cannot exceed 1000 characters")
     private String bio;
 
-    private MultipartFile profilePic;
+//    private MultipartFile profilePic;
 
     private Map<@NotBlank(message = "Social media platform cannot be blank") String,
             @URL(message = "Invalid URL for social media link") String> socialMedia;
 
-    private MultipartFile cv;
+//    private MultipartFile cv;
 }

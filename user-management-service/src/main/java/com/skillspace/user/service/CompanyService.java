@@ -95,14 +95,14 @@ public class CompanyService extends UserRegistrationService<Company> {
     }
 
     @Transactional
-    public CustomResponse<Company> updateCompany(Long companyId, UpdateCompany updatedCompany) {
+    public CustomResponse<Company> updateCompany(Long companyId, UpdateCompany updatedCompany, MultipartFile reqCertificate, MultipartFile reqLogo) {
 
         try {
             Optional<Company> existingCompanyOpt = companyRepository.findById(companyId);
 
             if (existingCompanyOpt.isPresent()) {
                 Company existingCompany = existingCompanyOpt.get();
-                updateCompanyFields(existingCompany, updatedCompany);
+                updateCompanyFields(existingCompany, updatedCompany, reqCertificate, reqLogo);
 
                 return new CustomResponse<>("Company updated successfully", HttpStatus.OK.value(), companyRepository.save(existingCompany));
             } else {
@@ -114,7 +114,7 @@ public class CompanyService extends UserRegistrationService<Company> {
     }
 
     //Helper
-    private void updateCompanyFields(Company existingCompany, UpdateCompany updatedCompany) {
+    private void updateCompanyFields(Company existingCompany, UpdateCompany updatedCompany, MultipartFile reqCertificate, MultipartFile reqLogo) {
         Optional.ofNullable(updatedCompany.getName())
                 .filter(name -> !name.isEmpty())
                 .ifPresent(existingCompany::setName);
@@ -130,14 +130,16 @@ public class CompanyService extends UserRegistrationService<Company> {
                     });
                 });
 
-        Optional.ofNullable(updatedCompany.getCertificate())
+//        Optional.ofNullable(updatedCompany.getCertificate())
+        Optional.ofNullable(reqCertificate)
                 .filter(certificateFile -> !certificateFile.isEmpty())
                 .ifPresent(certificateFile -> {
                     FileUploadResponse certificateUploadResponse = fileUploadService.uploadFile(certificateFile);
                     existingCompany.setCertificate(certificateUploadResponse.getFilePath());
                 });
 
-        Optional.ofNullable(updatedCompany.getLogo())
+//        Optional.ofNullable(updatedCompany.getLogo())
+        Optional.ofNullable(reqLogo)
                 .filter(logoFile -> !logoFile.isEmpty())
                 .ifPresent(logoFile -> {
                     FileUploadResponse logoUploadResponse = fileUploadService.uploadFile(logoFile);

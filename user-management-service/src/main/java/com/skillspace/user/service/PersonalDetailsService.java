@@ -36,7 +36,7 @@ public class PersonalDetailsService {
         this.accountRepository = accountRepository;
     }
 
-    public PersonalDetails updatePersonalDetails(Long talentId, PersonalDetailsDto personalDetails) {
+    public PersonalDetails updatePersonalDetails(Long talentId, PersonalDetailsDto personalDetails, MultipartFile reqProfilePic, MultipartFile reqCv) {
         Optional<PersonalDetails> isDetailsExist = repository.findPersonalDetailsByTalentId(talentId);
         Optional<Talent> talentInfo = talentRepository.findById(talentId);
 
@@ -66,13 +66,15 @@ public class PersonalDetailsService {
             Optional.ofNullable(personalDetails.getPortfolio()).ifPresent(newPersonalDetails::setPortfolio);
             Optional.ofNullable(personalDetails.getSocialMedia()).ifPresent(newPersonalDetails::setSocialMedia);
 
-            MultipartFile profilePic = personalDetails.getProfilePic();
+//            MultipartFile profilePic = personalDetails.getProfilePic();
+            MultipartFile profilePic = reqProfilePic;
             if (profilePic != null && !profilePic.isEmpty()) {
                 FileUploadResponse profilePicUploadResponse = fileUploadService.uploadFile(profilePic);
                 newPersonalDetails.setProfilePic(profilePicUploadResponse.getFilePath());
             }
 
-            MultipartFile cv = personalDetails.getCv();
+//            MultipartFile cv = personalDetails.getCv();
+            MultipartFile cv = reqCv;
             if (cv != null && !cv.isEmpty()) {
                 FileUploadResponse cvUploadResponse = fileUploadService.uploadFile(cv);
                 newPersonalDetails.setCv(cvUploadResponse.getFilePath());

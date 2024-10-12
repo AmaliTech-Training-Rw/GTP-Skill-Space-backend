@@ -3,6 +3,7 @@ package com.skillspace.user.util.helper;
 import com.skillspace.user.dto.EducationDto;
 import com.skillspace.user.dto.PersonalDetailsDto;
 import com.skillspace.user.dto.UpdateCompany;
+import com.skillspace.user.dto.UpdateEducationDto;
 import com.skillspace.user.entity.*;
 import com.skillspace.user.util.EnumUtil;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,8 +36,8 @@ public class HelperMethods {
         }
 
         personalDetails.setPortfolio(portfolio);
-        personalDetails.setCv(cv);
-        personalDetails.setProfilePic(profilePic);
+//        personalDetails.setCv(cv);
+//        personalDetails.setProfilePic(profilePic);
         personalDetails.setSocialMedia(socialMedia);
         personalDetails.setBio(bio);
         personalDetails.setDob(dob);
@@ -61,7 +62,7 @@ public class HelperMethods {
 
         educationDto.setDateCommencement(dateCommencement);
         educationDto.setDateCompleted(dateCompleted);
-        educationDto.setTranscripts(transcripts);
+//        educationDto.setTranscripts(transcripts);
 
         return  educationDto;
     }
@@ -81,8 +82,7 @@ public class HelperMethods {
         return education;
     }
 
-    public void updateEducationFields(Education education, EducationDto educationDto) {
-        Optional.ofNullable(educationDto.getTalentId()).ifPresent(education::setTalentId);
+    public void updateEducationFields(Education education, UpdateEducationDto educationDto) {
         Optional.ofNullable(educationDto.getNameOfInstitution()).ifPresent(education::setNameOfInstitution);
         Optional.ofNullable(educationDto.getAddressOfInstitution()).ifPresent(education::setAddressOfInstitution);
         Optional.ofNullable(educationDto.getCountry()).ifPresent(education::setCountry);
