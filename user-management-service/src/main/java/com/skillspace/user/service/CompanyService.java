@@ -8,6 +8,8 @@ import com.skillspace.user.repository.CompanyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,7 +18,12 @@ import java.util.List;
 public class CompanyService extends UserRegistrationService<Company> {
 
     @Autowired
-    private CompanyRepository companyRepository;
+    private final CompanyRepository companyRepository;
+
+    @Autowired
+    public CompanyService(CompanyRepository companyRepository) {
+        this.companyRepository = companyRepository;
+    }
 
     @Autowired
     private AccountRepository accountRepository;
@@ -31,7 +38,7 @@ public class CompanyService extends UserRegistrationService<Company> {
         return companyRepository.save(company);
     }
 
-    // Fetch companies with PENDING status
+    // method to fetch companies with PENDING status
     public List<Company> getPendingCompanies() {
         return companyRepository.findPendingCompanies();
     }
@@ -55,4 +62,13 @@ public class CompanyService extends UserRegistrationService<Company> {
         account.setStatus(AccountStatus.REJECTED);
         accountRepository.save(account);
     }
+
+    public List<Company> getAllCompanies() {
+        return companyRepository.findAll();
+    }
+
+    public Company findByName(String name) {
+        return companyRepository.findByName(name);
+    }
+
 }
