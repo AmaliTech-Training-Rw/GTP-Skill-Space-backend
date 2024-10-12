@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/account")
-public class AccountActivationController {
+public class TalentAccountActivationController {
 
     @Autowired
     private ActivationCodeService activationCodeService;

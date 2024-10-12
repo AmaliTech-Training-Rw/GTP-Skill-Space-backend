@@ -8,6 +8,7 @@ import com.skillspace.user.entity.UserRole;
 import com.skillspace.user.exception.AccountAlreadyExistsException;
 import com.skillspace.user.service.AccountService;
 import com.skillspace.user.service.ActivationCodeService;
+import com.skillspace.user.service.KafkaProducerService;
 import com.skillspace.user.service.TalentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +33,15 @@ public class TalentController {
     private AccountService accountService;
 
     @Autowired
-    private KafkaTemplate<String, TalentAccountCreatedEvent> kafkaTemplate;
+    private ActivationCodeService activationCodeService;
 
     @Autowired
-    private ActivationCodeService activationCodeService;
+    KafkaProducerService kafkaProducerService;
 
     @PostMapping("/talent")
     public ResponseEntity<?> registerTalent(@Valid @RequestBody TalentRegistrationRequest request) {
-        Account account = createAccountFromRequest(request);
-        Talent talent = createTalentFromRequest(request);
+        Account account = accountService.createAccountFromRequest(request);
+        Talent talent = talentService.createTalentFromRequest(request);
 
         // Check if the account already exists
         if (accountService.accountExists(account.getEmail())) {
@@ -49,7 +50,7 @@ public class TalentController {
         try {
             Talent registeredTalent = talentService.registerUser(talent, account);
             String activationCode = activationCodeService.createActivationCode(account.getId());
-            handleSendKafkaEvent(registeredTalent, account.getEmail(), activationCode);
+            kafkaProducerService.sendTalentActivationCodeEvent(registeredTalent, account.getEmail(), activationCode);
             return ResponseEntity.status(HttpStatus.CREATED).body(registeredTalent);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -57,33 +58,7 @@ public class TalentController {
         }
     }
 
-    // helper method to handle Kafka event sending logic
-    private void handleSendKafkaEvent(Talent registeredTalent, String email, String activationCode) {
-        TalentAccountCreatedEvent event = new TalentAccountCreatedEvent();
-        event.setFirstName(registeredTalent.getFirstName());
-        event.setLastName(registeredTalent.getLastName());
-        event.setEmail(email);
-        event.setActivationCode(activationCode);
-        kafkaTemplate.send("talent-accounts", event);
-    }
 
-    // Helper method to create Account from TalentRegistrationRequest
-    private Account createAccountFromRequest(TalentRegistrationRequest request) {
-        Account account = new Account();
-        account.setEmail(request.getEmail().trim());
-        account.setPassword(request.getPassword().trim());
-        account.setContact(request.getContact().trim());
-        account.setRole(UserRole.TALENT);
-        return account;
-    }
-
-    // Helper method to create Talent from TalentRegistrationRequest
-    private Talent createTalentFromRequest(TalentRegistrationRequest request) {
-        Talent talent = new Talent();
-        talent.setFirstName(request.getFirstname().trim());
-        talent.setLastName(request.getLastname().trim());
-        return talent;
-    }
 }
 
 
