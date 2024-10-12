@@ -4,6 +4,8 @@ import com.skillspace.user.dto.AdminRegistrationRequest;
 import com.skillspace.user.entity.Account;
 import com.skillspace.user.entity.Admin;
 import com.skillspace.user.entity.UserRole;
+import com.skillspace.user.exception.AccountAlreadyExistsException;
+import com.skillspace.user.service.AccountService;
 import com.skillspace.user.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,13 +22,25 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
+    @Autowired
+    private AccountService accountService;
+
     @PostMapping("/admin")
-    public ResponseEntity<Admin> registerAdmin(@RequestBody AdminRegistrationRequest request) {
+    public ResponseEntity<?> registerAdmin(@RequestBody AdminRegistrationRequest request) {
         Account account = createAccountFromRequest(request);
         Admin admin = createAdminFromRequest(request);
 
+        // Check if the account already exists
+        if (accountService.accountExists(account.getEmail())) {
+            throw new AccountAlreadyExistsException("Account with associated email: " + account.getEmail() +  " already exists");
+        }
+        try {
         Admin registeredAdmin = adminService.registerUser(admin, account);
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredAdmin);
+    } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unable to register admin at the moment");
+        }
     }
 
     // Helper method to create Account from AdminRegistrationRequest

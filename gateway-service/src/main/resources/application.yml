@@ -14,6 +14,26 @@ spring:
           uri: lb://user-management-service
           predicates:
             - Path=/users/**
+        - id: user-service-admin
+          uri: lb://user-management-service
+          predicates:
+            - Path=/admin/**
+        - id: user-service-talent
+          uri: lb://user-management-service
+          predicates:
+            - Path=/talent/**
+          filters:
+            - JwtAuthenticationFilter
+        - id: user-service-company
+          uri: lb://user-management-service
+          predicates:
+            - Path=/company/**
+          filters:
+            - JwtAuthenticationFilter
+        - id: user-service-accounts
+          uri: lb://user-management-service
+          predicates:
+            - Path=/api/account/**
         - id: user-service-auth
           uri: lb://user-management-service
           predicates:
@@ -104,3 +124,7 @@ springdoc:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
+
+logging:
+  level:
+    com.skillspace.gateway: DEBUG

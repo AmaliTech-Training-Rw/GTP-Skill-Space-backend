@@ -3,8 +3,13 @@ package com.skillspace.user.controller;
 import com.skillspace.user.dto.AuthRequest;
 import com.skillspace.user.dto.AuthResponse;
 import com.skillspace.user.entity.Account;
+import com.skillspace.user.entity.AccountStatus;
+import com.skillspace.user.entity.ActivationCode;
 import com.skillspace.user.jwt.JwtHandler;
 import com.skillspace.user.repository.AccountRepository;
+import com.skillspace.user.repository.ActivationCodeRepository;
+import com.skillspace.user.service.AccountService;
+import com.skillspace.user.service.ActivationCodeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,6 +39,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -51,8 +58,17 @@ public class AuthController {
     @Autowired
     private ClientRegistrationRepository clientRegistrationRepository;
 
-        @Autowired
+    @Autowired
     private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private ActivationCodeService activationCodeService;
+
+    @Autowired
+    private AccountService accountService;
+
+    @Autowired
+    ActivationCodeRepository activationCodeRepository;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
@@ -64,6 +80,10 @@ public class AuthController {
             Account account = accountRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+            if (account.getStatus() != AccountStatus.ACTIVE) {   // Check if the account status is active
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(new AuthResponse("Account not active"));
+            }
             String token = jwtHandler.generateToken(request.getEmail(), account.getRole());
             return ResponseEntity.ok(new AuthResponse(token));
         } catch (AuthenticationException e) {
@@ -157,4 +177,31 @@ public class AuthController {
         response.setHeader("Location", authorizationUri);
         return ResponseEntity.status(HttpStatus.FOUND).build();
     }
+
+    @PostMapping("/account/activate")
+    public ResponseEntity<?> activateAccount(@RequestParam("code") String code) {
+        ActivationCode activationCode = activationCodeService.findCode(code);
+
+        if (activationCode != null && !isCodeExpired(code)) {
+            // Token is valid and not expired, activate the account
+            Account account = accountService.findById(activationCode.getAccount().getId());
+            account.setStatus(AccountStatus.ACTIVE);
+            accountService.save(account);
+
+            activationCodeRepository.deleteByCode(code);
+            return ResponseEntity.ok("Account activated successfully!");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired token.");
+        }
+    }
+
+    private boolean isCodeExpired(String token) {
+        ActivationCode activationCode = activationCodeService.findCode(token);
+        if (activationCode == null) {
+            return true;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        return activationCode.getExpirationTime().isBefore(now);
+    }
+
 }
