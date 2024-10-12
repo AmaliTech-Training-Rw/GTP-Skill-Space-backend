@@ -16,6 +16,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @Query("SELECT c FROM Company c WHERE c.userId.status = 'PENDING'")
     List<Company> findPendingCompanies();
+
     Company findByName(String name);
 }
 

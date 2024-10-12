@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/users/profiles")
+@RequestMapping("users")
 public class ProfileController {
 
     private final PersonalDetailsService service;
@@ -34,7 +34,7 @@ public class ProfileController {
     }
 
 
-    @PatchMapping(value = "/talent-details/{talentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/talent/profile/{talentId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CustomResponse<PersonalDetails>>
     updateTalentDetails(@PathVariable Long talentId,
                         @RequestPart("personalDetailsDto") @Valid PersonalDetailsDto personalDetails,
@@ -48,13 +48,13 @@ public class ProfileController {
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/talent/profile-id/{id}")
     public ResponseEntity<CustomResponse<PersonalDetails>> findById(@PathVariable UUID id) {
-        Optional<PersonalDetails> telentDetails = service.findById(id);
+        Optional<PersonalDetails> talentDetails = service.findById(id);
 
-        if (telentDetails.isPresent()) {
+        if (talentDetails.isPresent()) {
             return new ResponseEntity<>(new CustomResponse<>("Talent details retrieved successfully",
-                    HttpStatus.OK.value(), telentDetails.get()), HttpStatus.OK);
+                    HttpStatus.OK.value(), talentDetails.get()), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(new CustomResponse<>("Talent not found", HttpStatus.NOT_FOUND.value(),
                     null), HttpStatus.NOT_FOUND);
@@ -62,18 +62,18 @@ public class ProfileController {
     }
 
 
-    @GetMapping("/{talentId}")
+    @GetMapping("/talent/profile/{talentId}")
     public ResponseEntity<CustomResponse<PersonalDetails>> findByTalentId(@PathVariable Long talentId) {
-        Optional<PersonalDetails> telentDetails = service.findTalentProfile(talentId);
+        Optional<PersonalDetails> talentDetails = service.findTalentProfile(talentId);
 
-        return telentDetails.map(personalDetails -> new ResponseEntity<>(new CustomResponse<>(
+        return talentDetails.map(personalDetails -> new ResponseEntity<>(new CustomResponse<>(
                         "Talent details retrieved successfully", HttpStatus.OK.value(), personalDetails), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(new CustomResponse<>("Talent not found",
                         HttpStatus.NOT_FOUND.value(), null), HttpStatus.NOT_FOUND));
     }
 
 
-    @PatchMapping(value = "company/{companyId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/company/profile/{companyId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CustomResponse<Company>>
     updateCompany(@PathVariable Long companyId,
                   @RequestPart(value = "companyDto", required = false) @Valid UpdateCompany company,

@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/users/talent-educations")
+@RequestMapping("/users/talent/educations")
 public class EducationController {
 
     private final EducationService educationService;
