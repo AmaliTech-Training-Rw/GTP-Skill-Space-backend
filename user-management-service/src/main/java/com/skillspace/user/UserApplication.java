@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @OpenAPIDefinition(
@@ -19,6 +20,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 		scheme = "bearer",
 		bearerFormat = "JWT"
 )
+@EnableTransactionManagement
 public class UserApplication {
 
 	public static void main(String[] args) {
