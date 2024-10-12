@@ -1,13 +1,17 @@
 package com.skillspace.user.controller;
 
+import com.skillspace.user.dto.CompanyAccountCreatedEvent;
 import com.skillspace.user.dto.CompanyRegistrationRequest;
 import com.skillspace.user.entity.Account;
 import com.skillspace.user.entity.Company;
 import com.skillspace.user.entity.UserRole;
+import com.skillspace.user.exception.AccountAlreadyExistsException;
+import com.skillspace.user.service.AccountService;
 import com.skillspace.user.service.CompanyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,13 +24,24 @@ public class CompanyController {
     @Autowired
     private CompanyService companyService;
 
+    @Autowired
+    private AccountService accountService;
+
     @PostMapping("/company")
-    public ResponseEntity<Company> registerCompany(@RequestBody CompanyRegistrationRequest request) {
+    public ResponseEntity<?> registerCompany(@RequestBody CompanyRegistrationRequest request) {
         Account account = createAccountFromRequest(request);
         Company company = createCompanyFromRequest(request);
 
+        // Check if the account already exists
+        if (accountService.accountExists(account.getEmail())) {
+            throw new AccountAlreadyExistsException("Account with associated email: " + account.getEmail() +  " already exists");
+        }
+        try {
         Company registeredCompany = companyService.registerUser(company, account);
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredCompany);
+    }  catch(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Unable to register company at the moment");}
     }
 
     // Helper method to create Account from CompanyRegistrationRequest
