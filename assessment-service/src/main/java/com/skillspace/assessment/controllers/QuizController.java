@@ -23,28 +23,28 @@ public class QuizController {
     @Autowired
     private QuizService quizService;
 
-
     @PostMapping
-    public ResponseEntity<Quiz> createQuiz(@Valid @RequestPart Quiz quiz, @RequestPart MultipartFile image) {
+    public ResponseEntity<Quiz> createQuiz(@Valid @RequestPart Quiz quiz, @RequestPart(required = false) MultipartFile image) {
         if (quiz.getQuestions() == null || quiz.getQuestions().isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
 
-        Quiz createdQuiz;
         try {
-            createdQuiz = quizService.createQuiz(quiz, image);
+            Quiz createdQuiz = quizService.createQuiz(quiz, image);
+            return new ResponseEntity<>(createdQuiz, HttpStatus.CREATED);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-
-        return new ResponseEntity<>(createdQuiz, HttpStatus.CREATED);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<Quiz> getQuizById(@PathVariable UUID id) {
-        Quiz quiz = quizService.getQuizById(id);
-        return ResponseEntity.ok(quiz);
+        try {
+            Quiz quiz = quizService.getQuizById(id);
+            return ResponseEntity.ok(quiz);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     @GetMapping
@@ -56,16 +56,38 @@ public class QuizController {
         return ResponseEntity.ok(quizzes);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Quiz> updateQuiz(@PathVariable UUID id, @RequestBody Quiz quiz) {
-        Quiz updatedQuiz = quizService.updateQuiz(id, quiz);
-        return ResponseEntity.ok(updatedQuiz);
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<Quiz> updateQuiz(
+//            @PathVariable UUID id,
+//            @Valid @RequestPart Quiz quizDetails,
+//            @RequestPart(required = false) MultipartFile image) {
+//        try {
+//            Quiz updatedQuiz = quizService.updateQuiz(id, quizDetails, image);
+//            return ResponseEntity.ok(updatedQuiz);
+//        } catch (IOException e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        }
+//    }
+@PutMapping("/{id}")
+public ResponseEntity<Quiz> updateQuiz(
+        @PathVariable UUID id,
+        @RequestBody Quiz updatedQuiz) {
 
+    // Call the service method to update the quiz
+    Quiz quiz = quizService.updateQuiz(id, updatedQuiz);
+
+    return ResponseEntity.ok(quiz);
+}
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuiz(@PathVariable UUID id) {
-        quizService.deleteQuiz(id);
-        return ResponseEntity.noContent().build();
+        try {
+            quizService.deleteQuiz(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PostMapping("/{id}/attempt")
@@ -79,8 +101,41 @@ public class QuizController {
         userAnswers.add(request.getAnswer5());
         userAnswers.removeIf(answer -> answer == null || answer.isEmpty());
 
-        QuizAttemptResult result = quizService.saveQuizAttempt(dummyUserId, id, userAnswers);
-        return ResponseEntity.ok(result);
+        try {
+            QuizAttemptResult result = quizService.saveQuizAttempt(dummyUserId, id, userAnswers);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<List<Quiz>> getQuizzesByCompanyId(@PathVariable String companyId) {
+        List<Quiz> quizzes = quizService.getQuizzesByCompanyId(companyId);
+        return ResponseEntity.ok(quizzes);
+    }
+
+    @GetMapping("/global")
+    public ResponseEntity<List<Quiz>> getGlobalQuizzes() {
+        List<Quiz> quizzes = quizService.getGlobalQuizzes();
+        return ResponseEntity.ok(quizzes);
+    }
+
+    @GetMapping("/local/{companyId}")
+    public ResponseEntity<List<Quiz>> getLocalQuizzes(@PathVariable String companyId) {
+        List<Quiz> quizzes = quizService.getLocalQuizzes(companyId);
+        return ResponseEntity.ok(quizzes);
+    }
+    @GetMapping("/title/{title}")
+    public ResponseEntity<List<Quiz>> getQuizzesByTitle(@PathVariable String title) {
+        List<Quiz> quizzes = quizService.getQuizzesByTitle(title);
+        return ResponseEntity.ok(quizzes);
+    }
+    @GetMapping("/filter")
+    public ResponseEntity<List<Quiz>> filterQuizzes(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String title) {
+        List<Quiz> quizzes = quizService.filterQuizzes(companyId, title);
+        return ResponseEntity.ok(quizzes);
     }
 
     @PostMapping("/{id}/retry")

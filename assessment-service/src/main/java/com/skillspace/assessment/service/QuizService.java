@@ -15,10 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -52,17 +49,55 @@ public class QuizService {
                 .orElseThrow(() -> new QuizNotFoundException("Quiz not found with ID: " + id));
     }
 
-    public Quiz updateQuiz(UUID id, Quiz quizDetails) {
-        Quiz existingQuiz = getQuizById(id);
-        existingQuiz.setTitle(quizDetails.getTitle());
-        existingQuiz.setQuestions(quizDetails.getQuestions());
-        existingQuiz.setTimeLimit(quizDetails.getTimeLimit());
-        existingQuiz.setPassingScore(quizDetails.getPassingScore());
-        existingQuiz.setUpdatedAt(LocalDateTime.now());
+    public Quiz updateQuiz(UUID id, Quiz updatedQuiz) {
+        Optional<Quiz> existingQuizOptional = quizRepository.findById(id);
 
-        log.info("Updating quiz with ID: {}", id);
-        return quizRepository.save(existingQuiz);
+        if (existingQuizOptional.isPresent()) {
+            Quiz existingQuiz = existingQuizOptional.get();
+
+
+            existingQuiz.setTitle(updatedQuiz.getTitle());
+            existingQuiz.setCompanyId(updatedQuiz.getCompanyId());
+            existingQuiz.setQuestions(updatedQuiz.getQuestions());
+            existingQuiz.setTimeLimit(updatedQuiz.getTimeLimit());
+            existingQuiz.setUpdatedAt(updatedQuiz.getUpdatedAt());
+            existingQuiz.setStatus(updatedQuiz.getStatus());
+            existingQuiz.setGlobal(updatedQuiz.isGlobal());
+            existingQuiz.setPassingScore(updatedQuiz.getPassingScore());
+            existingQuiz.setTotalPoints(updatedQuiz.getTotalPoints());
+            existingQuiz.setImageUrl(updatedQuiz.getImageUrl());
+            return quizRepository.save(existingQuiz);
+        } else {
+            throw new IllegalArgumentException("Quiz not found");
+        }
     }
+    public List<Quiz> getQuizzesByCompanyId(String companyId) {
+        return quizRepository.findByCompanyId(companyId);
+    }
+
+    public List<Quiz> getGlobalQuizzes() {
+        return quizRepository.findByIsGlobalTrue();
+    }
+    public List<Quiz> getQuizzesByTitle( String title) {
+        return quizRepository.findByTitle(title);
+    }
+
+    public List<Quiz> getLocalQuizzes(String companyId) {
+        return quizRepository.findByCompanyIdAndIsGlobalFalse(companyId);
+    }
+
+    public List<Quiz> filterQuizzes(String companyId, String title) {
+        if (companyId != null && title != null) {
+            return quizRepository.findByCompanyIdAndTitleContaining(companyId, "%" + title + "%");
+        } else if (companyId != null) {
+            return quizRepository.findByCompanyId(companyId);
+        } else if (title != null) {
+            return quizRepository.findByTitle(title);
+        } else {
+            return quizRepository.findAll();
+        }
+    }
+
 
     public void deleteQuiz(UUID id) {
         log.info("Deleting quiz with ID: {}", id);
@@ -134,11 +169,6 @@ public class QuizService {
 
     public List<Quiz> filterQuizzes(String companyId, String title, String programId) {
         return quizRepository.findAll();
-    }
-
-    public boolean evaluateQuizCompletion(UUID quizId, int score) {
-        Quiz quiz = getQuizById(quizId);
-        return score >= quiz.getPassingScore();
     }
 
     private int calculateTotalPoints(Quiz quiz) {
