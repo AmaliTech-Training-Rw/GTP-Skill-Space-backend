@@ -20,9 +20,6 @@ public class TalentAccountConsumer {
     @Autowired
     private NotificationService notificationService;
 
-    @Value("${activation.base.url}")
-    private String activationBaseUrl;
-
     private static final Logger log = LoggerFactory.getLogger(TalentAccountConsumer.class);
 
     @KafkaListener(topics = "talent-accounts", groupId = "${spring.kafka.consumer.group-id}")

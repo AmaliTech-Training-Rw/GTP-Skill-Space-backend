@@ -1,5 +1,6 @@
 package com.skillspace.user.service;
 
+import com.skillspace.user.dto.TalentRegistrationRequest;
 import com.skillspace.user.entity.Account;
 import com.skillspace.user.entity.AccountStatus;
 import com.skillspace.user.entity.UserRole;
@@ -55,6 +56,16 @@ public class AccountService implements UserDetailsService {
                 .orElseThrow(() -> new AccountNotFoundException("Account not found with email: " + email));
         account.setStatus(AccountStatus.ACTIVE);
         accountRepository.save(account);
+    }
+
+    // Helper method to create Account from TalentRegistrationRequest
+    public Account createAccountFromRequest(TalentRegistrationRequest request) {
+        Account account = new Account();
+        account.setEmail(request.getEmail().trim());
+        account.setPassword(request.getPassword().trim());
+        account.setContact(request.getContact().trim());
+        account.setRole(UserRole.TALENT);
+        return account;
     }
 }
 

@@ -8,6 +8,7 @@ import com.skillspace.user.repository.CompanyRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -19,6 +20,9 @@ public class CompanyService extends UserRegistrationService<Company> {
 
     @Autowired
     private final CompanyRepository companyRepository;
+
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
 
     @Autowired
     public CompanyService(CompanyRepository companyRepository) {
@@ -44,23 +48,27 @@ public class CompanyService extends UserRegistrationService<Company> {
     }
 
     // method to approve company by setting the associated account's status to ACTIVE
-    public void approveCompany(Long companyId) {
+    @Transactional
+    public Company approveCompany(Long companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
         Account account = company.getUserId();
         account.setStatus(AccountStatus.ACTIVE);
         accountRepository.save(account);
+        return company;
     }
 
     // method to reject company by setting the associated account's status to REJECTED
-    public void rejectCompany(Long companyId) {
+    @Transactional
+    public Company rejectCompany(Long companyId) {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
         Account account = company.getUserId();
         account.setStatus(AccountStatus.REJECTED);
         accountRepository.save(account);
+        return company;
     }
 
     public List<Company> getAllCompanies() {
