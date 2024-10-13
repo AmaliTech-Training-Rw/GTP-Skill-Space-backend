@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CompanyService extends UserRegistrationService<Company> {
@@ -37,6 +38,9 @@ public class CompanyService extends UserRegistrationService<Company> {
     }
     public Company findByName(String name) {
         return companyRepository.findByName(name);
+    }
+    public Optional<Company> findCompanyById(long companyId) {
+        return companyRepository.findById(companyId);
     }
 
 }

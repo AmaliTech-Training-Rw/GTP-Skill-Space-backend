@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 
 @Data
 @Table("career_applications")
-public class CareerApplication {
+public class Application {
     @PrimaryKey
     private Long id = IdGenerator.generateId();
     private Long careerId;
     private Long talentId;
-    private String status; // e.g., "pending", "approved", "rejected"
-    private LocalDateTime appliedAt;
+    private String status = "pending"; // e.g., "pending", "approved", "rejected"
+    private LocalDateTime commencementDate;
 }
 

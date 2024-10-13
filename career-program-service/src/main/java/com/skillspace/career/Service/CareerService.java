@@ -5,10 +5,12 @@ import com.skillspace.career.Repository.CareerRepository;
 import com.skillspace.career.dto.CompanyDTO;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
 import com.skillspace.career.Client.CompanyClient;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,34 +32,6 @@ public class CareerService {
         this.companyClient = companyClient;
     }
 
-//    // Method to check if a company exists by companyId using RestTemplate
-//    private boolean doesCompanyExist(Long companyId) {
-//        try {
-//            String url = String.format("http://user-management-service/api/users/companies/id/%s", companyId);
-//            ResponseEntity<CompanyDTO> response = restTemplate.getForEntity(url, CompanyDTO.class);
-//
-//            // Check if the response is successful and the body is not null
-//            return response.getStatusCode().is2xxSuccessful() && response.getBody() != null;
-//        } catch (Exception e) {
-//            // Log the error and return false if the company service call fails
-//            System.err.println("Error occurred while checking company existence: " + e.getMessage());
-//            return false;
-//        }
-//    }
-
-//    public Career createCareer(Career career) {
-//        // Validate companyId before creating the career
-//        if (career.getCompanyId() == null || !doesCompanyExist(career.getCompanyId())) {
-//            throw new RuntimeException("Company with ID " + career.getCompanyId() + " does not exist");
-//        }
-//
-//        // Generate a unique Long ID if null
-//        if (career.getId() == null) {
-//            career.setId(Math.abs(UUID.randomUUID().getMostSignificantBits())); // Generates a unique Long ID
-//        }
-//
-//        return careerRepository.save(career);
-//    }
 
     public Career updateCareer(Long id, Career careerDetails) {
         Career career = careerRepository.findById(id)
@@ -116,5 +90,21 @@ public class CareerService {
         }
         return careerRepository.findByCompanyId(company.getCompanyId());
     }
+
+
+    private CompanyDTO verifyAndGetCompany(Long companyId) {
+        CompanyDTO company = companyClient.getCompanyById(companyId);
+        if (company == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found with id: " + companyId);
+        }
+        return company;
+    }
+    public Career saveCareerProgram(Career career, Long companyId) {
+        CompanyDTO company = verifyAndGetCompany(companyId);
+        career.setCompanyId(company.getCompanyId());
+        return careerRepository.save(career);
+    }
+
+
 
 }

@@ -1,54 +1,80 @@
 package com.skillspace.application.service;
 
-
-import com.skillspace.application.Model.CareerApplication;
-import com.skillspace.application.Client.CareerProgramClient;
-import com.skillspace.application.Client.UserManagementClient;
-import com.skillspace.application.dto.CareerApplicationDTO;
-import com.skillspace.application.dto.CareerDTO;
-import com.skillspace.application.dto.TalentDTO;
-import com.skillspace.application.Repository.CareerApplicationRepository;
+import com.skillspace.application.Model.Application;
+import com.skillspace.application.Repository.ApplicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ApplicationService {
 
     @Autowired
-    private CareerApplicationRepository careerApplicationRepository;
+    private final ApplicationRepository applicationRepository;
 
     @Autowired
-    private UserManagementClient userManagementClient;
+    public ApplicationService(ApplicationRepository applicationRepository) {
+        this.applicationRepository = applicationRepository;
+    }
 
-    @Autowired
-    private CareerProgramClient careerProgramClient;
+    // Create or save a new application
+    public Application createApplication(Application application) {
+        return applicationRepository.save(application);
+    }
 
-    public String applyToCareer(CareerApplicationDTO applicationDTO) {
-        CareerDTO career = careerProgramClient.getCareerById(applicationDTO.getCareerId());
-        TalentDTO talent = userManagementClient.getTalentById(applicationDTO.getTalentId());
+    // Get all applications
+    public List<Application> getAllApplications() {
+        return applicationRepository.findAll();
+    }
 
-        if (talent.getUpdatedAt().isBefore(LocalDateTime.now().minusDays(30))) {
-            throw new IllegalStateException("Profile must be updated before applying");
+    // Get an application by its ID
+    public Optional<Application> getApplicationById(Long id) {
+        return applicationRepository.findById(id);
+    }
+
+    // Update an existing application
+    public Application updateApplication(Application application) {
+        return applicationRepository.save(application);
+    }
+
+    // Delete an application by its ID
+    public void deleteApplication(Long id) {
+        applicationRepository.deleteById(id);
+    }
+
+    // Get applications by career ID
+    public List<Application> getApplicationsByCareerId(Long careerId) {
+        return applicationRepository.findByCareerId(careerId);
+    }
+
+    // Get applications by talent ID
+    public List<Application> getApplicationsByTalentId(Long talentId) {
+        return applicationRepository.findByTalentId(talentId);
+    }
+
+    // Get applications by status
+    public List<Application> getApplicationsByStatus(String status) {
+        return applicationRepository.findByStatus(status);
+    }
+    public Application approveApplication(Long id) {
+        Optional<Application> applicationOptional = applicationRepository.findById(id);
+        if (applicationOptional.isPresent()) {
+            Application application = applicationOptional.get();
+            application.setStatus("approved");
+            return applicationRepository.save(application);
         }
+        throw new RuntimeException("Application not found");
+    }
 
-        List<String> talentBadges = userManagementClient.getTalentBadges(applicationDTO.getTalentId());
-
-        if (!talentBadges.containsAll(career.getRequiredBadges())) {
-            throw new IllegalStateException("Talent does not have all required badges");
+    public Application rejectApplication(Long id) {
+        Optional<Application> applicationOptional = applicationRepository.findById(id);
+        if (applicationOptional.isPresent()) {
+            Application application = applicationOptional.get();
+            application.setStatus("rejected");
+            return applicationRepository.save(application);
         }
-
-        CareerApplication application = new CareerApplication();
-        application.setCareerId(applicationDTO.getCareerId());
-        application.setTalentId(applicationDTO.getTalentId());
-        application.setStatus("pending");
-        application.setAppliedAt(LocalDateTime.now());
-
-        careerApplicationRepository.save(application);
-
-        return "Application submitted successfully";
+        throw new RuntimeException("Application not found");
     }
 }
-

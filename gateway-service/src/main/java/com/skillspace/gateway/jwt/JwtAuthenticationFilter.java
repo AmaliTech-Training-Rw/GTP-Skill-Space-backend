@@ -73,6 +73,13 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             onError(exchange, "Forbidden: Companies only", HttpStatus.FORBIDDEN).subscribe();
             return false;
         }
+        if (isCareerServicePath(path)) {
+            String method = exchange.getRequest().getMethod().name();
+            if ((method.equals("POST") || method.equals("PUT") || method.equals("DELETE")) && !"ADMIN".equals(role)) {
+                onError(exchange, "Forbidden: Admins only for create, update, and delete operations", HttpStatus.FORBIDDEN).subscribe();
+                return false;
+            }
+        }
         return true;
     }
 
@@ -110,6 +117,9 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
 
     private boolean isCompanyPath(String path) {
         return path.startsWith("/company");
+    }
+    private boolean isCareerServicePath(String path) {
+        return path.startsWith("/careers");
     }
 
     public static class Config {

@@ -13,7 +13,9 @@ import java.util.List;
 @FeignClient(name = "user-management-service")
 public interface CompanyClient {
 
-    @GetMapping("/auth/register/{name}")
+    @GetMapping("/auth/register/company/name/{name}")
      CompanyDTO getCompanyByName(@PathVariable("name") String name);
 
+    @GetMapping("auth/register/company/id/{companyId}")
+    CompanyDTO getCompanyById(@PathVariable("companyId") Long companyId);
 }

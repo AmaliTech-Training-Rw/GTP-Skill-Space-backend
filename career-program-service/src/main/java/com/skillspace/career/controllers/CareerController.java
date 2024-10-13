@@ -6,7 +6,6 @@ import com.skillspace.career.Service.CareerService;
 import com.skillspace.career.dto.CompanyDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -97,6 +96,19 @@ public class CareerController {
         return careerService.getProgramsByCompanyId(company.getCompanyId());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Career> getCareer(@PathVariable Long id) {
+        List<Career> careers = careerService.getCareerById(id);
+        if (careers.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return new ResponseEntity<>(careers.getFirst(), HttpStatus.OK);
+        }
+    }
 
-
+    @PostMapping
+    public ResponseEntity<Career> createCareerProgram(@RequestBody Career career, @RequestParam Long companyId) {
+        Career savedCareer = careerService.saveCareerProgram(career, companyId);
+        return ResponseEntity.ok(savedCareer);
+    }
 }

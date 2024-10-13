@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth/register")
@@ -51,14 +52,24 @@ public class CompanyController {
         company.setWebsite(request.getWebsite().trim());
         return company;
     }
-    @GetMapping("/all")
+
+    @GetMapping("/company/all")
     public List<Company> getAllCompanies() {
         return companyService.getAllCompanies();
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/company/name/{name}")
     public Company getCompanyByName(@PathVariable String name) {
         return companyService.findByName(name);
+    }
+
+    @GetMapping("/company/id/{companyId}")
+    public ResponseEntity<Company> getCompanyById(@PathVariable long companyId) {
+        Optional<Company> companyOptional = companyService.findCompanyById(companyId);
+
+        // If company is found, return it; otherwise, return 404 (Not Found)
+        return companyOptional.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
 
