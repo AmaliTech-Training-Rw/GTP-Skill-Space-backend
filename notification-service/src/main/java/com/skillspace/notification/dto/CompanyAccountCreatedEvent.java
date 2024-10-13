@@ -1,4 +1,4 @@
-package com.skillspace.user.dto;
+package com.skillspace.notification.dto;
 
 import lombok.Data;
 

@@ -1,8 +1,11 @@
 package com.skillspace.user.service;
 
+import com.skillspace.user.dto.CompanyRegistrationRequest;
 import com.skillspace.user.entity.Account;
 import com.skillspace.user.entity.AccountStatus;
 import com.skillspace.user.entity.Company;
+import com.skillspace.user.entity.UserRole;
+import com.skillspace.user.exception.AccountAlreadyExistsException;
 import com.skillspace.user.repository.AccountRepository;
 import com.skillspace.user.repository.CompanyRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -22,7 +25,7 @@ public class CompanyService extends UserRegistrationService<Company> {
     private final CompanyRepository companyRepository;
 
     @Autowired
-    private KafkaProducerService kafkaProducerService;
+    private AccountService accountService;
 
     @Autowired
     public CompanyService(CompanyRepository companyRepository) {
@@ -32,6 +35,33 @@ public class CompanyService extends UserRegistrationService<Company> {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private ActivationCodeService activationCodeService;
+
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+
+    // method to handle register company logic and trigger kafka send verification code
+    @Transactional
+    public Company registerCompany(CompanyRegistrationRequest request) {
+        Account account = accountService.createCompanyAccountFromRequest(request);
+
+        // Check if the account already exists
+        if (accountService.accountExists(account.getEmail())) {
+            throw new AccountAlreadyExistsException("Account with associated email: " + account.getEmail() + " already exists");
+        }
+
+        Company company = createCompanyFromRequest(request);
+        Company registeredCompany = this.registerUser(company, account);
+
+        // Create and send activation code event after successful registration
+        String activationCode = activationCodeService.createActivationCode(account.getId());
+        kafkaProducerService.sendCompanyVerificationCodeEvent(registeredCompany, account.getEmail(), activationCode);
+
+        return registeredCompany;
+    }
+
+    // helper method to save a company user
     @Override
     protected Company saveUser(Company company, Account savedAccount) {
         // Link the Company entity to the saved Account entity
@@ -68,6 +98,16 @@ public class CompanyService extends UserRegistrationService<Company> {
         Account account = company.getUserId();
         account.setStatus(AccountStatus.REJECTED);
         accountRepository.save(account);
+        return company;
+    }
+
+    // Helper method to create Company from CompanyRegistrationRequest
+    public Company createCompanyFromRequest(CompanyRegistrationRequest request) {
+        Company company = new Company();
+        company.setName(request.getName().trim());
+        company.setCertificate(request.getCertificate().trim());
+        company.setLogo(request.getLogo().trim());
+        company.setWebsite(request.getWebsite().trim());
         return company;
     }
 
