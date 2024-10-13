@@ -47,8 +47,6 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
     @Autowired
     private AccountRepository accountRepository;
 
@@ -60,12 +58,6 @@ public class AuthController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private ActivationCodeService activationCodeService;
-
-    @Autowired
-    private AccountService accountService;
 
     @Autowired
     ActivationCodeRepository activationCodeRepository;
@@ -87,7 +79,6 @@ public class AuthController {
             String token = jwtHandler.generateToken(request.getEmail(), account.getRole());
             return ResponseEntity.ok(new AuthResponse(token));
         } catch (AuthenticationException e) {
-            logger.error("Invalid login attempt for email: {}", request.getEmail(), e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("Invalid credentials"));
         }
     }
@@ -96,7 +87,6 @@ public class AuthController {
     public ResponseEntity<AuthResponse> googleLogin(@RequestParam("code") String code) {
         try {
             ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("google");
-            logger.info("Attempting Google OAuth login");
 
             OAuth2AuthorizationRequest authorizationRequest = OAuth2AuthorizationRequest.authorizationCode()
                     .clientId(clientRegistration.getClientId())
@@ -116,9 +106,6 @@ public class AuthController {
             OAuth2AccessTokenResponseClient<OAuth2AuthorizationCodeGrantRequest> tokenResponseClient = new DefaultAuthorizationCodeTokenResponseClient();
             OAuth2AuthorizationCodeGrantRequest grantRequest = new OAuth2AuthorizationCodeGrantRequest(clientRegistration, authorizationExchange);
             OAuth2AccessTokenResponse tokenResponse = tokenResponseClient.getTokenResponse(grantRequest);
-
-            logger.info("Successfully retrieved OAuth2 access token");
-
             OAuth2AccessToken accessToken = tokenResponse.getAccessToken();
 
             // Use the access token to get user info
@@ -134,7 +121,6 @@ public class AuthController {
                     Map.class
             );
 
-            logger.info("Successfully retrieved user info from Google");
 
             Map<String, Object> userAttributes = response.getBody();
             String email = (String) userAttributes.get("email");
@@ -146,13 +132,10 @@ public class AuthController {
 
             return ResponseEntity.ok(new AuthResponse(token));
         } catch (UsernameNotFoundException e) {
-            logger.error("User not found: ", e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("User not found"));
         } catch (RestClientException e) {
-            logger.error("Error communicating with Google API: ", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AuthResponse("Failed to retrieve user info from Google"));
         } catch (Exception e) {
-            logger.error("General error during Google OAuth login: ", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AuthResponse("Authentication failed"));
         }
     }
@@ -161,7 +144,6 @@ public class AuthController {
     public ResponseEntity<Void> authorizeGoogle(HttpServletResponse response) {
         ClientRegistration clientRegistration = this.clientRegistrationRepository.findByRegistrationId("google");
         if (clientRegistration == null) {
-            logger.error("Google ClientRegistration not found");
             return ResponseEntity.badRequest().build();
         }
 
@@ -176,32 +158,6 @@ public class AuthController {
 
         response.setHeader("Location", authorizationUri);
         return ResponseEntity.status(HttpStatus.FOUND).build();
-    }
-
-    @PostMapping("/account/activate")
-    public ResponseEntity<?> activateAccount(@RequestParam("code") String code) {
-        ActivationCode activationCode = activationCodeService.findCode(code);
-
-        if (activationCode != null && !isCodeExpired(code)) {
-            // Token is valid and not expired, activate the account
-            Account account = accountService.findById(activationCode.getAccount().getId());
-            account.setStatus(AccountStatus.ACTIVE);
-            accountService.save(account);
-
-            activationCodeRepository.deleteByCode(code);
-            return ResponseEntity.ok("Account activated successfully!");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired token.");
-        }
-    }
-
-    private boolean isCodeExpired(String token) {
-        ActivationCode activationCode = activationCodeService.findCode(token);
-        if (activationCode == null) {
-            return true;
-        }
-        LocalDateTime now = LocalDateTime.now();
-        return activationCode.getExpirationTime().isBefore(now);
     }
 
 }
