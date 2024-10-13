@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.data.cassandra.repository.config.EnableCassandraRepositories;
 
 @SpringBootApplication
 @OpenAPIDefinition(
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 		bearerFormat = "JWT"
 )
 @EnableTransactionManagement
+@EnableCassandraRepositories(basePackages = "com.skillspace.user.repository")
 public class UserApplication {
 
 	public static void main(String[] args) {

@@ -1,5 +1,7 @@
 package com.skillspace.user.exception;
 
+
+import com.skillspace.user.util.CustomResponse;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.validation.FieldError;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.security.auth.login.AccountNotFoundException;
 import java.util.HashMap;
@@ -39,7 +42,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleAccountNotFound(AccountNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found");
     }
-
+  
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGlobalException(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -66,5 +69,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body("Invalid input: " + e.getMessage());
     }
 
-}
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<CustomResponse<String>> handleResponseStatusException(ResponseStatusException ex) {
+        CustomResponse<String> response = new CustomResponse<>(ex.getReason(), ex.getStatusCode().value());
+        return new ResponseEntity<>(response, HttpStatus.valueOf(ex.getStatusCode().value()));
+    }
 
+}

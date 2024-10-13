@@ -1,5 +1,6 @@
 package com.skillspace.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,7 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long companyId;
 
+    @JsonIgnore
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userid")
     private Account userId;
