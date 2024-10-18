@@ -109,5 +109,10 @@ public class ApplicationController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+    @PostMapping("/apply")
+    public ResponseEntity<String> applyForCareer(@RequestBody Application application) {
+        Application savedApplication = applicationService.applyForCareer(application);
+        return ResponseEntity.ok("application sent successfully");
+    }
 }
 

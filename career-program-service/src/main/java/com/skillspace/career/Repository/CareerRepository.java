@@ -9,5 +9,4 @@ import java.util.List;
 public interface CareerRepository extends CassandraRepository<Career, Long> {
     List<Career> findByStatus(String status);
     List<Career> findByCompanyId(Long companyId);
-    List<Career> findByRequiredBadgesIn(List<String> badges);
 }

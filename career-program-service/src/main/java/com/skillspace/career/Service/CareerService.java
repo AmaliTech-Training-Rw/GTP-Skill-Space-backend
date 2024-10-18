@@ -2,7 +2,9 @@ package com.skillspace.career.Service;
 
 import com.skillspace.career.Model.Career;
 import com.skillspace.career.Repository.CareerRepository;
+import com.skillspace.career.dto.CareerProgramRequest;
 import com.skillspace.career.dto.CompanyDTO;
+import feign.FeignException;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,20 +17,21 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
+
 
 @Service
 public class CareerService {
+
     @Autowired
     private final CompanyClient companyClient;
     private final CareerRepository careerRepository;
-    private final RestTemplate restTemplate;
+
 
 
     @Autowired
-    public CareerService(CareerRepository careerRepository, RestTemplate restTemplate, CompanyClient companyClient) {
+    public CareerService(CareerRepository careerRepository,  CompanyClient companyClient) {
         this.careerRepository = careerRepository;
-        this.restTemplate = restTemplate;
+
         this.companyClient = companyClient;
     }
 
@@ -61,16 +64,6 @@ public class CareerService {
         return careerRepository.findAll();
     }
 
-    public Career saveAsDraft(Career career) {
-        career.setStatus("draft");
-        return careerRepository.save(career);
-    }
-
-    public Career saveAsPublished(Career career) {
-        career.setStatus("published");
-        return careerRepository.save(career);
-    }
-
     public List<Career> getDraftCareers() {
         return careerRepository.findByStatus("draft");
     }
@@ -92,19 +85,45 @@ public class CareerService {
     }
 
 
-    private CompanyDTO verifyAndGetCompany(Long companyId) {
-        CompanyDTO company = companyClient.getCompanyById(companyId);
-        if (company == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found with id: " + companyId);
-        }
-        return company;
-    }
-    public Career saveCareerProgram(Career career, Long companyId) {
-        CompanyDTO company = verifyAndGetCompany(companyId);
-        career.setCompanyId(company.getCompanyId());
+    public Career saveCareerProgramAsDraft(CareerProgramRequest request) {
+        validateRequest(request);
+        verifyCompany(request.getCompanyId());
+        Career career = request.getCareer();
+        career.setCompanyId(request.getCompanyId());
+        career.setStatus("draft");
         return careerRepository.save(career);
     }
 
+    public Career saveCareerProgramAsPublished(CareerProgramRequest request) {
+        validateRequest(request);
+        verifyCompany(request.getCompanyId());
+        Career career = request.getCareer();
+        career.setCompanyId(request.getCompanyId());
+        career.setStatus("published");
+        return careerRepository.save(career);
+    }
 
+    private void validateRequest(CareerProgramRequest request) {
+        if (request == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body cannot be null");
+        }
+        if (request.getCareer() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Career object cannot be null");
+        }
+        if (request.getCompanyId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company ID cannot be null");
+        }
+    }
+
+    private void verifyCompany(Long companyId) {
+        try {
+            CompanyDTO company = companyClient.getCompanyById(companyId);
+            if (company == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Company not found with id: " + companyId);
+            }
+        } catch (FeignException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error verifying company: " + e.getMessage());
+        }
+    }
 
 }

@@ -12,6 +12,4 @@ public interface UserManagementClient {
     @GetMapping("/auth/register/talent/{talentId}")
     TalentDTO getTalentById(@PathVariable Long talentId);
 
-    @GetMapping("/api/talents/{talentId}/badges")
-    List<String> getTalentBadges(@PathVariable Long talentId);
 }

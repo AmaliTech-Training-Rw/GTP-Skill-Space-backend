@@ -3,11 +3,13 @@ package com.skillspace.career.controllers;
 import com.skillspace.career.Client.CompanyClient;
 import com.skillspace.career.Model.Career;
 import com.skillspace.career.Service.CareerService;
+import com.skillspace.career.dto.CareerProgramRequest;
 import com.skillspace.career.dto.CompanyDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.List;
@@ -57,17 +59,6 @@ public class CareerController {
         return new ResponseEntity<>(draftCareers, HttpStatus.OK);
     }
 
-    @PostMapping("/draft")
-    public ResponseEntity<Career> saveCareerAsDraft(@RequestBody Career career) {
-        Career savedDraft = careerService.saveAsDraft(career);
-        return new ResponseEntity<>(savedDraft, HttpStatus.CREATED);
-    }
-
-    @PostMapping("/published")
-    public ResponseEntity<Career> savePublishedCareer(@RequestBody Career career) {
-        Career savedPublished = careerService.saveAsPublished(career);
-        return new ResponseEntity<>(savedPublished, HttpStatus.CREATED);
-    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCareer(@PathVariable Long id) {
@@ -106,9 +97,23 @@ public class CareerController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<Career> createCareerProgram(@RequestBody Career career, @RequestParam Long companyId) {
-        Career savedCareer = careerService.saveCareerProgram(career, companyId);
-        return ResponseEntity.ok(savedCareer);
+    @PostMapping("/draft")
+    public ResponseEntity<?> createDraftCareerProgram(@RequestBody CareerProgramRequest request) {
+        try {
+            Career savedCareer = careerService.saveCareerProgramAsDraft(request);
+            return ResponseEntity.ok(savedCareer);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        }
+    }
+
+    @PostMapping("/publish")
+    public ResponseEntity<?> createPublishedCareerProgram(@RequestBody CareerProgramRequest request) {
+        try {
+            Career savedCareer = careerService.saveCareerProgramAsPublished(request);
+            return ResponseEntity.ok(savedCareer);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
+        }
     }
 }
