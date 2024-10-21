@@ -3,24 +3,21 @@ package com.skillspace.user.controller;
 import com.skillspace.user.dto.EducationDto;
 import com.skillspace.user.dto.UpdateEducationDto;
 import com.skillspace.user.entity.Education;
-import com.skillspace.user.entity.ProgramStatus;
 import com.skillspace.user.service.EducationService;
 import com.skillspace.user.util.CustomResponse;
 import com.skillspace.user.util.helper.HelperMethods;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/users/talent/educations")
+@RequestMapping("/talent/educations")
 public class EducationController {
 
     private final EducationService educationService;

@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +49,7 @@ public class CompanyService extends UserRegistrationService<Company> {
     @Autowired
     private  FileUploadService fileUploadService;
 
+    @Autowired
     private ActivationCodeService activationCodeService;
 
     @Autowired
@@ -55,7 +57,11 @@ public class CompanyService extends UserRegistrationService<Company> {
 
     // method to handle register company logic and trigger kafka send verification code
     @Transactional
-    public Company registerCompany(CompanyRegistrationRequest request) {
+    public Company registerCompany(CompanyRegistrationRequest request, MultipartFile certificate, MultipartFile logo) {
+
+        FileUploadResponse certificateFileUploadResponse= fileUploadService.uploadFile(certificate);
+        FileUploadResponse logoFileUploadResponse= fileUploadService.uploadFile(logo);
+
         Account account = accountService.createCompanyAccountFromRequest(request);
 
         // Check if the account already exists
@@ -63,7 +69,7 @@ public class CompanyService extends UserRegistrationService<Company> {
             throw new AccountAlreadyExistsException("Account with associated email: " + account.getEmail() + " already exists");
         }
 
-        Company company = createCompanyFromRequest(request);
+        Company company = createCompanyFromRequest(request, certificateFileUploadResponse.getFilePath(), logoFileUploadResponse.getFilePath());
         Company registeredCompany = this.registerUser(company, account);
 
         // Create and send activation code event after successful registration
@@ -114,11 +120,11 @@ public class CompanyService extends UserRegistrationService<Company> {
     }
 
     // Helper method to create Company from CompanyRegistrationRequest
-    public Company createCompanyFromRequest(CompanyRegistrationRequest request) {
+    public Company createCompanyFromRequest(CompanyRegistrationRequest request, String certificate, String logo) {
         Company company = new Company();
         company.setName(request.getName().trim());
-        company.setCertificate(request.getCertificate().trim());
-        company.setLogo(request.getLogo().trim());
+        company.setCertificate(certificate);
+        company.setLogo(logo);
         company.setWebsite(request.getWebsite().trim());
         return company;
     }

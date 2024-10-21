@@ -29,6 +29,7 @@ public class TalentService extends UserRegistrationService<Talent> {
     @Autowired
     private EducationRepository educationRepository;
 
+    @Autowired
     private AccountService accountService;
 
     @Autowired

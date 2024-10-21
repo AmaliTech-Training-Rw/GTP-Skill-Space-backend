@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("users")
+@RequestMapping
 public class ProfileController {
 
     private final PersonalDetailsService service;

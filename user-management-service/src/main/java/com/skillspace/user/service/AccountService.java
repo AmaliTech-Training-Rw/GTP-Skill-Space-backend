@@ -9,12 +9,19 @@ import com.skillspace.user.repository.TalentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import javax.security.auth.login.AccountNotFoundException;
+import java.util.Collections;
+import java.util.List;
 
 @Service
-public class AccountService{
+public class AccountService implements UserDetailsService {
 
     @Autowired
     private AccountRepository accountRepository;
@@ -105,5 +112,18 @@ public class AccountService{
                 .orElseThrow(() -> new EntityNotFoundException("Account not found with email: " + email));
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        // Get the role from the account entity
+        UserRole userRole = account.getRole();
+
+        // Create a list of GrantedAuthority based on the UserRole enum
+        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(userRole.name()));
+
+        return new org.springframework.security.core.userdetails.User(account.getEmail(), account.getPassword(), authorities);
+    }
 }
 
