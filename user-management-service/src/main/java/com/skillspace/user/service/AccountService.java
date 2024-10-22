@@ -125,5 +125,12 @@ public class AccountService implements UserDetailsService {
 
         return new org.springframework.security.core.userdetails.User(account.getEmail(), account.getPassword(), authorities);
     }
+
+    public Account save(Account account) {
+        if (!account.isGoogleLinked()) {
+            account.setGoogleLinked(false);  // Set default value if null
+        }
+        return accountRepository.save(account);
+    }
 }
 
