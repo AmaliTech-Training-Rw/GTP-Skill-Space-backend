@@ -6,8 +6,29 @@ spring:
     name: api-gateway
   main:
     web-application-type: reactive
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://accounts.google.com
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            exposedHeaders:
+              - Authorization
+              - Access-Control-Allow-Origin
+              - Access-Control-Allow-Credentials
       routes:
         # user-service
         - id: user-service
@@ -38,6 +59,8 @@ spring:
           uri: lb://user-management-service
           predicates:
             - Path=/auth/**, /api/password-reset/**
+          filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_FIRST
         - id: user-service-api-docs
           uri: lb://user-management-service
           predicates:

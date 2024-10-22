@@ -1,23 +1,29 @@
 package com.skillspace.user.exception;
 
 
+import com.skillspace.user.dto.ErrorResponse;
 import com.skillspace.user.util.CustomResponse;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.KafkaException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.validation.FieldError;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.security.auth.login.AccountNotFoundException;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -73,6 +79,40 @@ public class GlobalExceptionHandler {
     public ResponseEntity<CustomResponse<String>> handleResponseStatusException(ResponseStatusException ex) {
         CustomResponse<String> response = new CustomResponse<>(ex.getReason(), ex.getStatusCode().value());
         return new ResponseEntity<>(response, HttpStatus.valueOf(ex.getStatusCode().value()));
+    }
+
+    @ExceptionHandler(TokenVerificationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleTokenVerificationException(TokenVerificationException e) {
+        log.error("Token verification failed", e);
+        return new ErrorResponse("Authentication failed", "Invalid or expired token");
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleAuthenticationException(AuthenticationException e) {
+        log.error("Authentication error", e);
+        return new ErrorResponse("Authentication failed", e.getMessage());
+    }
+
+    @ExceptionHandler(GeneralSecurityException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleGeneralSecurityException(GeneralSecurityException e) {
+        log.error("Security error occurred", e);
+        return ErrorResponse.builder()
+                .message("A security error occurred. Please try again later.")
+                .error("SECURITY_ERROR")
+                .build();
+    }
+
+    @ExceptionHandler(IOException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErrorResponse handleIOException(IOException e) {
+        log.error("IO operation failed", e);
+        return ErrorResponse.builder()
+                .message("Service temporarily unavailable. Please try again later.")
+                .error("IO_ERROR")
+                .build();
     }
 
 }

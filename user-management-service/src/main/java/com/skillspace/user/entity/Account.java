@@ -42,5 +42,11 @@ public class Account {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Column(name = "google_id")
+    private String googleId;
+
+    @Column(name = "google_linked")
+    private boolean googleLinked = false;
+
 }
 
