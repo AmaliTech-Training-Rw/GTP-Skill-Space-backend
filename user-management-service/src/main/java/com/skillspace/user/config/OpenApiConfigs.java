@@ -25,18 +25,4 @@ public class OpenApiConfigs {
                 .servers(List.of(new Server().url(url)))
                 .info(new Info().title(serviceTitle).version(serviceVersion));
     }
-
-//    @Bean
-//    public CorsFilter corsFilter() {
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//
-//        CorsConfiguration config = new CorsConfiguration();
-//        config.setAllowCredentials(true);
-//        config.addAllowedOrigin("*");
-//        config.addAllowedHeader("*");
-//        config.addAllowedMethod("*");
-//
-//        source.registerCorsConfiguration("/users/v3/api-docs", config);
-//        return new CorsFilter(source);
-//    }
 }

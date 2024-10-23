@@ -10,6 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "user-management-service")
 public interface CompanyClient {
 
-    @GetMapping("/auth/register/{name}")
+    @GetMapping("/companies/{name}")
      CompanyDTO getCompanyByName(@PathVariable("name") String name);
 }
