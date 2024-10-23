@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/auth/register")
+@RequestMapping
 public class CompanyController {
 
     private final CompanyService companyService;
@@ -27,19 +27,19 @@ public class CompanyController {
         this.companyService = companyService;
     }
 
-    @PostMapping(value ="/company", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value ="/auth/register/company", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> registerCompany(@Valid @RequestPart CompanyRegistrationRequest request, @RequestPart(value = "certificate", required = false) MultipartFile certificate,
                                              @RequestPart(value = "logo", required = false) MultipartFile logo) {
         Company registeredCompany = companyService.registerCompany(request, certificate, logo);
         return ResponseEntity.status(HttpStatus.CREATED).body(registeredCompany);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/companies/all")
     public List<Company> getAllCompanies() {
         return companyService.getAllCompanies();
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/companies/{name}")
     public Company getCompanyByName(@PathVariable String name) {
         return companyService.findByName(name);
     }
